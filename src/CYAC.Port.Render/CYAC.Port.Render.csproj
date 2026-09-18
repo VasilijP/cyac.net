@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    CYAC.Port.Render — the native port's PURE software renderer (port batch 7, plan of record
+    doc/port-batch7-poc-plan.md §2 step 1; renderer law D2 + doc/native-port-plan.md §7.6).
+
+    PURE means, literally: this assembly takes a pixel target (a Span<uint> in the host's own
+    encoding, plus its dimensions and column stride) and a READ-ONLY view of simulation state, and
+    writes pixels.  It never sees a window, a Vulkan handle, an input device or any other host type,
+    and it never writes back into simulation state — decisions stay integer-side (plan §3).
+
+    DEPENDENCY RULE (native-port-plan §9b + batch-7 protocol rule 4): CYAC.Port.Core ONLY.  Never
+    CYAC.Emulator*, never mode13hx, never CYAC.Formats.  RenderPurityTests asserts it by reflection.
+
+    Geometry is double (the anti-shimmer law, plan §7.6); nothing of the 1991 projector / CSD
+    transform / mesh JIT is ported here.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RootNamespace>CYAC.Port.Render</RootNamespace>
+    <!--
+      ★★ R2 (port batch 8) — ONE unsafe block, in Pipeline/DisplayListDrawer.RunTiles.  A
+      PixelTarget is a ref struct and cannot cross a thread boundary, so the tiled drawer pins the
+      host's pixel span for exactly the length of its parallel section and each worker rebuilds an
+      identical target over the pinned memory.  No pointer outlives the `fixed` block, and this
+      stays the assembly's only unsafe code.
+    -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CYAC.Port.Core\CYAC.Port.Core.csproj" />
+  </ItemGroup>
+
+  <!--
+    R1 (port batch 8) — the DISPLAY LIST (Pipeline/) is internal on purpose: it is the boundary
+    between the renderer's two stages, not part of the assembly's host-facing surface (which stays
+    "pixels in a Span<uint>, nothing else").  The unit tests assert what the WHAT stage puts in it
+    WITHOUT drawing a pixel (doc/port-render-concept.md §1), so they need to see it.
+  -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="CYAC.Port.Render.Tests" />
+  </ItemGroup>
+
+</Project>

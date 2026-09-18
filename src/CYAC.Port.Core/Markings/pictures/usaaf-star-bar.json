@@ -1,0 +1,14 @@
+{
+  "format": "cyac.marking/1",
+  "name": "usaaf-star-bar",
+  "about": "USAAF national insignia, September 1943 to January 1947: white star on an insignia-blue disc, white bars, the whole outlined in blue. Picture units: the disc has radius 0.5 (size = the disc's diameter). Proportions per the wartime spec: bar length = disc radius each side, bar height = half the radius, blue border 1/8 radius.",
+  "symmetric": true,
+  "bareMetal": "#A8ACB0",
+  "wear": { "chipping": { "amount": 0.10, "scale": 0.07, "seed": 3, "edgeBand": 0.06 }, "edgeWear": { "width": 0.012, "strength": 0.35 } },
+  "layers": [
+    { "color": "#1F2F5C", "shape": { "type": "union", "children": [ { "type": "circle", "r": 0.5625 }, { "type": "rect", "w": 2.125, "h": 0.625 } ] } },
+    { "color": "#F2F2EE", "shape": { "type": "rect", "w": 2.0, "h": 0.5 } },
+    { "color": "#1F2F5C", "shape": { "type": "circle", "r": 0.5 } },
+    { "color": "#F2F2EE", "shape": { "type": "star", "points": 5, "r": 0.47, "inner": 0.18, "rotation": 90 } }
+  ]
+}

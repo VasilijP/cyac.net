@@ -1,0 +1,18 @@
+{
+  "format": "cyac.markings-diff/1",
+  "class": "p47",
+  "base": { "generator": "MarkingBootstrap/1", "sha256": "a0d8e4630b506bebd95bb606b883353cf1eb4ae6f495c97cf4acf7ff79bfe082", "placements": 3 },
+  "remove": [],
+  "modify": {
+    "rule:wing upper": {
+      "bareMetal": "none"
+    },
+    "rule:wing lower": {
+      "bareMetal": "none"
+    },
+    "rule:fuselage side": {
+      "bareMetal": "none"
+    }
+  },
+  "add": []
+}

@@ -1,0 +1,12 @@
+{
+  "format": "cyac.marking/1",
+  "name": "balkenkreuz",
+  "about": "Luftwaffe Balkenkreuz, the 1939-45 wing and fuselage form: a black cross with white flanks along the arms (no white caps at the arm ends). Cross arm length 1.0 (size = the cross's width).",
+  "symmetric": true,
+  "bareMetal": "#A8ACB0",
+  "wear": { "chipping": { "amount": 0.12, "scale": 0.06, "seed": 11, "edgeBand": 0.05 }, "edgeWear": { "width": 0.01, "strength": 0.3 } },
+  "layers": [
+    { "color": "#F2F2EE", "shape": { "type": "union", "children": [ { "type": "rect", "w": 1.0, "h": 0.42 }, { "type": "rect", "w": 0.42, "h": 1.0 } ] } },
+    { "color": "#141414", "shape": { "type": "union", "children": [ { "type": "rect", "w": 1.0, "h": 0.26 }, { "type": "rect", "w": 0.26, "h": 1.0 } ] } }
+  ]
+}

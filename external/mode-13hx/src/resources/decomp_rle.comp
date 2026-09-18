@@ -1,0 +1,38 @@
+#version 450
+
+#define BLOCK_SIZE 64u
+#define PIXELS_PER_BLOCK 63u
+
+layout(local_size_x = 32) in; // for GPU it might be better to have more smaller blocks and higher parallelism
+layout(set = 0, binding = 0) buffer CompressedBlocks { uint blocks[]; };
+layout(set = 0, binding = 1, rgba8) uniform writeonly image2D outputImage;
+
+layout(push_constant) uniform PushConstants { uint Width; uint Height; };
+
+// variant 1 GPU decompression
+void main()
+{
+    uint blockIndex = gl_GlobalInvocationID.x;
+    uint blockOffset = blockIndex * BLOCK_SIZE;
+    uint target = blocks[blockOffset]; // The starting pixel offset for this block
+
+    for (uint pixelIndex = 1u; pixelIndex <= PIXELS_PER_BLOCK; ++pixelIndex)
+    {
+        uint pixelData = blocks[blockOffset + pixelIndex];
+        uint a = (pixelData >> 24u) & 0xFFu; // decode the repetition count from the alpha channel
+        if (a == 255u) { continue; } // suppressed pixel
+
+        uint b = (pixelData >> 16u) & 0xFFu;
+        uint g = (pixelData >> 8u) & 0xFFu;
+        uint r = pixelData & 0xFFu;
+        uint totalRepetitions = a + 1u; // 0..254 +1
+
+        for (uint j = 0u; j < totalRepetitions; ++j)
+        {
+            uint x = target % Width, y = target / Width;
+            target++;
+            vec4 color = vec4(r, g, b, 255u) / 255.0;
+            imageStore(outputImage, ivec2(int(x), int(y)), color);
+        }
+    }
+}

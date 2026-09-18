@@ -1,0 +1,14 @@
+{
+  "format": "cyac.marking/1",
+  "name": "raf-roundel",
+  "about": "RAF Type C1 roundel: red, white, blue, yellow in the 3:1:3:1 proportion. Outer radius 0.5.",
+  "symmetric": true,
+  "bareMetal": "#A8ACB0",
+  "wear": { "chipping": { "amount": 0.08, "scale": 0.06, "seed": 19, "edgeBand": 0.05 } },
+  "layers": [
+    { "color": "#E1B830", "shape": { "type": "circle", "r": 0.5 } },
+    { "color": "#1F2F5C", "shape": { "type": "circle", "r": 0.4375 } },
+    { "color": "#F2F2EE", "shape": { "type": "circle", "r": 0.25 } },
+    { "color": "#B3202B", "shape": { "type": "circle", "r": 0.1875 } }
+  ]
+}

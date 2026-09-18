@@ -1,0 +1,29 @@
+{
+  "format": "cyac.markings-diff/1",
+  "class": "b52",
+  "base": { "generator": "MarkingBootstrap/1", "sha256": "9879a09b88a4355d504590b31ce3da308fa20331725722526cd5091a110df0fd", "placements": 3 },
+  "remove": [],
+  "modify": {
+    "rule:wing upper": {
+      "origin": [-106.8, -4.677, -35.814],
+      "u": [-0.8279, 0, -0.5609],
+      "v": [-0.5609, 0, 0.8279],
+      "size": 12,
+      "bareMetal": "none"
+    },
+    "rule:wing lower": {
+      "origin": [115.969, -4.677, -38.657],
+      "u": [0.866, 0, -0.5],
+      "v": [0.5, 0, 0.866],
+      "size": 12,
+      "bareMetal": "none",
+      "wear": { "edgeWear": { "width": 0.012, "strength": 0.3 } }
+    },
+    "rule:fuselage side": {
+      "origin": [-6.5, -10.026, -43.557],
+      "size": 12,
+      "bareMetal": "none"
+    }
+  },
+  "add": []
+}

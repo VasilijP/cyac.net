@@ -1,0 +1,13 @@
+{
+  "format": "cyac.marking/1",
+  "name": "soviet-star",
+  "about": "Soviet (and Korean War North Korean / Soviet-unit) red star with a white border and a thin red outer line. Tip radius 0.5.",
+  "symmetric": true,
+  "bareMetal": "#A8ACB0",
+  "wear": { "chipping": { "amount": 0.10, "scale": 0.06, "seed": 17, "edgeBand": 0.05 }, "edgeWear": { "width": 0.01, "strength": 0.3 } },
+  "layers": [
+    { "color": "#B3202B", "shape": { "type": "star", "points": 5, "r": 0.5, "inner": 0.2, "rotation": 90 } },
+    { "color": "#F2F2EE", "shape": { "type": "star", "points": 5, "r": 0.46, "inner": 0.184, "rotation": 90 } },
+    { "color": "#B3202B", "shape": { "type": "star", "points": 5, "r": 0.4, "inner": 0.16, "rotation": 90 } }
+  ]
+}

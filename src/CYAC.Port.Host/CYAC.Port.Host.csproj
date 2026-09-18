@@ -1,0 +1,69 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    CYAC.Port.Host — the native port's EXECUTABLE HOST (port batch 7 step 1,
+    doc/port-batch7-poc-plan.md §2).  This is the only project in CYAC.Port.* that is allowed to
+    know about a window: it owns Main, builds mode-13hx's WindowOptions/EngineWindow exactly as
+    external/mode-13hx/src/Program.cs RunWithOptions does, and supplies the IRasterizer.
+
+    Dependencies (batch-7 protocol rule 4 + plan §2 step 1):
+      mode13hx        the window, Vulkan presentation, keyboard/mouse, Canvas/font
+      CYAC.Port.Core  the certified integer flight kernel and the data tree
+      CYAC.Port.Render the pure renderer
+      CYAC.Port.Audio  the pure sound path (H11)
+      CYAC.Formats    PngWriter, for the headless frame dump ONLY (transform-time codec library;
+                      the game itself never reads an original asset — transform-plan law L2)
+    NEVER CYAC.Emulator*.
+
+    Referencing mode13hx (an Exe) is legal in the .NET SDK; its resources/*.spv shaders and
+    resources/texture/*.tga fonts are CopyToOutputDirectory items and flow into this project's
+    output through the ProjectReference (verified: see temp/port_b7/H1_report.md §3).
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RootNamespace>CYAC.Port.Host</RootNamespace>
+    <AssemblyName>cyac-fly</AssemblyName>
+    <!-- mode13hx also defines a Program.Main; ours is the entry point of this assembly. -->
+    <StartupObject>CYAC.Port.Host.Program</StartupObject>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Publishing with a runtime identifier (dotnet publish -r <rid>) copies the referenced
+         cyac-transform executable's apphost and deps.json twice - once from its RID-less build
+         and once from its RID build - and the SDK refuses the duplicate (NETSDK1152).  Both are
+         the same program for the same platform, so the duplicate is allowed here; each RID is
+         published on its own OS (the release workflow), never cross-built. -->
+    <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+  </PropertyGroup>
+
+  <!-- ★ Q3 (2026-09-17) — the cross-platform live audio device (doc/port-public-repo-plan.md §5.2).
+       Silk.NET.SDL is MIT and the same 2.22.0 line as mode-13hx's Silk.NET packages; the native it
+       depends on, Ultz.Native.SDL 2.30.8, is SDL2 under the zlib licence and carries
+       linux-arm/arm64/x64, osx (universal x86_64 + arm64), win-arm64/x64/x86 through the standard
+       runtimes/<rid>/native mechanism.  ONLY the audio subsystem is initialised: the window,
+       the input and the presentation stay mode-13hx's GLFW + Vulkan. -->
+  <ItemGroup>
+    <PackageReference Include="Silk.NET.SDL" Version="2.22.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\external\mode-13hx\src\mode13hx.csproj" />
+    <ProjectReference Include="..\CYAC.Port.Core\CYAC.Port.Core.csproj" />
+    <ProjectReference Include="..\CYAC.Port.Audio\CYAC.Port.Audio.csproj" />
+    <ProjectReference Include="..\CYAC.Port.Render\CYAC.Port.Render.csproj" />
+    <ProjectReference Include="..\CYAC.Formats\CYAC.Formats.csproj" />
+    <!-- The startup checks (the preflight option); the host supplies the settings and statistics checks. -->
+    <ProjectReference Include="..\CYAC.Port.Preflight\CYAC.Port.Preflight.csproj" />
+  </ItemGroup>
+
+  <!-- ★ F1 — the test project asserts on the host's INTERNAL seams (Program.MenuMode, the sortie
+       factory's own builders).  Same arrangement M1 made for CYAC.Port.Transform: the tests read the
+       production code's own definitions rather than a second copy of them. -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="CYAC.Port.Host.Tests" />
+  </ItemGroup>
+
+</Project>

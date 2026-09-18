@@ -1,0 +1,208 @@
+#version 450
+
+// L26 fixed-rate block wavelet decompressor
+// Each 8x8 tile is stored as 8 uints (256 bits). One workgroup per tile, 32 threads per workgroup (2 pixels per thread).
+// Bit layout (must match CPU encoder in FrameCompressorL26.cs):
+//   Y:  DC(8u) + L3det(3x6s) + L2det(12x4s) + L1_LH+HL(32x2s) = 140 bits
+//   Co: DC(8s) + L3det(3x5s) + L2det(12x3s) = 58 bits
+//   Cg: DC(8s) + L3det(3x5s) + L2det(12x3s) = 58 bits
+//   Total: 256 bits = 8 uints
+
+#define TILE_SIZE 8
+#define BLOCK_UINTS 8
+#define BLOCK_PIXELS 64
+
+// Q factors (must match CPU)
+#define QY_DC   1
+#define QY_L3   4
+#define QY_L2  16
+#define QY_L1  64
+#define QC_DC   2
+#define QC_L3   8
+#define QC_L2  32
+
+layout(local_size_x = 32) in;
+layout(set = 0, binding = 0) buffer CompressedBlocks { uint blocks[]; };
+layout(set = 0, binding = 1, rgba8) uniform writeonly image2D outputImage;
+layout(push_constant) uniform PushConstants { uint Width; uint Height; };
+
+shared uint blockData[BLOCK_UINTS];
+shared int coeffs[3][BLOCK_PIXELS]; // Y, Co, Cg
+
+// ── Bit reading helpers ──────────────────────────────────────────────────────
+uint readBits(int bitPos, int bits)
+{
+    int wordIdx = bitPos >> 5;
+    int bitIdx = bitPos & 31;
+    uint mask = (1u << bits) - 1u;
+    uint value = (blockData[wordIdx] >> bitIdx) & mask;
+    if (bitIdx + bits > 32)
+        value |= (blockData[wordIdx + 1] << (32 - bitIdx)) & mask;
+    return value;
+}
+
+int readBitsSigned(int bitPos, int bits)
+{
+    uint raw = readBits(bitPos, bits);
+    if ((raw & (1u << (bits - 1))) != 0u)
+        raw |= ~((1u << bits) - 1u);
+    return int(raw);
+}
+
+// ── Inverse 1D Haar lifting step (in shared memory, one dimension at a time) ──
+// Operates on a row or column of length `n` within an 8-wide 2D layout.
+// For rows: stride=1, base=row*8
+// For cols: stride=8, base=col
+
+void inverseHaar1D(int ch, int base_, int stride, int n)
+{
+    int h = n / 2;
+    int tmp[8]; // temp buffer to avoid overwriting values we still need to read
+    for (int i = 0; i < h; i++)
+    {
+        int s = coeffs[ch][base_ + i * stride];
+        int d = coeffs[ch][base_ + (h + i) * stride];
+        int even = s - (d >> 1);
+        int odd = d + even;
+        tmp[2 * i] = even;
+        tmp[2 * i + 1] = odd;
+    }
+    for (int i = 0; i < n; i++)
+        coeffs[ch][base_ + i * stride] = tmp[i];
+}
+
+void main()
+{
+    uint blockIndex = gl_WorkGroupID.x;
+    uint localId = gl_LocalInvocationID.x; // 0..31
+
+    uint tilesX = (Width + uint(TILE_SIZE) - 1u) / uint(TILE_SIZE);
+
+    // Load block data into shared memory (8 uints, first 8 threads load one each)
+    if (localId < uint(BLOCK_UINTS))
+        blockData[localId] = blocks[blockIndex * uint(BLOCK_UINTS) + localId];
+    barrier();
+
+    // ── Unpack coefficients (single thread to avoid bit-offset complexity) ──
+    if (localId == 0u)
+    {
+        // Zero all coefficients (HH1 for Y, all L1 for Co/Cg are not stored)
+        for (int i = 0; i < BLOCK_PIXELS; i++) { coeffs[0][i] = 0; coeffs[1][i] = 0; coeffs[2][i] = 0; }
+
+        int bp = 0;
+
+        // === Y channel (140 bits) ===
+        coeffs[0][0] = int(readBits(bp, 8)); bp += 8;  // DC unsigned
+        coeffs[0][0*8+1] = readBitsSigned(bp, 6) * QY_L3; bp += 6; // LH3
+        coeffs[0][1*8+0] = readBitsSigned(bp, 6) * QY_L3; bp += 6; // HL3
+        coeffs[0][1*8+1] = readBitsSigned(bp, 6) * QY_L3; bp += 6; // HH3
+
+        // L2 detail (12 coeffs) Q=16
+        // LH2: rows[0,1] cols[2,3]
+        for (int r = 0; r < 2; r++)
+            for (int c = 2; c < 4; c++)
+            { coeffs[0][r*8+c] = readBitsSigned(bp, 4) * QY_L2; bp += 4; }
+        // HL2: rows[2,3] cols[0,1]
+        for (int r = 2; r < 4; r++)
+            for (int c = 0; c < 2; c++)
+            { coeffs[0][r*8+c] = readBitsSigned(bp, 4) * QY_L2; bp += 4; }
+        // HH2: rows[2,3] cols[2,3]
+        for (int r = 2; r < 4; r++)
+            for (int c = 2; c < 4; c++)
+            { coeffs[0][r*8+c] = readBitsSigned(bp, 4) * QY_L2; bp += 4; }
+
+        // L1 LH+HL (32 coeffs) Q=64
+        // LH1: rows[0..3] cols[4..7]
+        for (int r = 0; r < 4; r++)
+            for (int c = 4; c < 8; c++)
+            { coeffs[0][r*8+c] = readBitsSigned(bp, 2) * QY_L1; bp += 2; }
+        // HL1: rows[4..7] cols[0..3]
+        for (int r = 4; r < 8; r++)
+            for (int c = 0; c < 4; c++)
+            { coeffs[0][r*8+c] = readBitsSigned(bp, 2) * QY_L1; bp += 2; }
+        // HH1: rows[4..7] cols[4..7] — zeroed, 0 bits
+
+        // === Co channel (58 bits) ===
+        coeffs[1][0] = readBitsSigned(bp, 8) * QC_DC; bp += 8;
+        coeffs[1][0*8+1] = readBitsSigned(bp, 5) * QC_L3; bp += 5;
+        coeffs[1][1*8+0] = readBitsSigned(bp, 5) * QC_L3; bp += 5;
+        coeffs[1][1*8+1] = readBitsSigned(bp, 5) * QC_L3; bp += 5;
+        for (int r = 0; r < 2; r++)
+            for (int c = 2; c < 4; c++)
+            { coeffs[1][r*8+c] = readBitsSigned(bp, 3) * QC_L2; bp += 3; }
+        for (int r = 2; r < 4; r++)
+            for (int c = 0; c < 2; c++)
+            { coeffs[1][r*8+c] = readBitsSigned(bp, 3) * QC_L2; bp += 3; }
+        for (int r = 2; r < 4; r++)
+            for (int c = 2; c < 4; c++)
+            { coeffs[1][r*8+c] = readBitsSigned(bp, 3) * QC_L2; bp += 3; }
+
+        // === Cg channel (58 bits) ===
+        coeffs[2][0] = readBitsSigned(bp, 8) * QC_DC; bp += 8;
+        coeffs[2][0*8+1] = readBitsSigned(bp, 5) * QC_L3; bp += 5;
+        coeffs[2][1*8+0] = readBitsSigned(bp, 5) * QC_L3; bp += 5;
+        coeffs[2][1*8+1] = readBitsSigned(bp, 5) * QC_L3; bp += 5;
+        for (int r = 0; r < 2; r++)
+            for (int c = 2; c < 4; c++)
+            { coeffs[2][r*8+c] = readBitsSigned(bp, 3) * QC_L2; bp += 3; }
+        for (int r = 2; r < 4; r++)
+            for (int c = 0; c < 2; c++)
+            { coeffs[2][r*8+c] = readBitsSigned(bp, 3) * QC_L2; bp += 3; }
+        for (int r = 2; r < 4; r++)
+            for (int c = 2; c < 4; c++)
+            { coeffs[2][r*8+c] = readBitsSigned(bp, 3) * QC_L2; bp += 3; }
+    }
+    barrier();
+
+    // ── Inverse 2D Haar transform (3 levels, per channel) ──
+    // Single-threaded per channel to keep it simple and correct.
+    // Thread 0 handles Y, thread 1 handles Co, thread 2 handles Cg.
+    if (localId < 3u)
+    {
+        int ch = int(localId);
+        int n = 2; // start from smallest subband (level 3 → 2x2)
+        for (int level = 2; level >= 0; level--)
+        {
+            // Inverse columns then rows (reverse of forward: forward did rows then cols)
+            for (int col = 0; col < n; col++)
+                inverseHaar1D(ch, col, 8, n);
+            for (int row = 0; row < n; row++)
+                inverseHaar1D(ch, row * 8, 1, n);
+            n *= 2;
+        }
+    }
+    barrier();
+
+    // ── Inverse YCoCg-R → RGB and write pixels ──
+    // 32 threads handle 64 pixels (2 pixels per thread)
+    for (uint p = 0u; p < 2u; p++)
+    {
+        uint pixelIdx = localId * 2u + p;
+        uint row = pixelIdx / uint(TILE_SIZE);
+        uint col = pixelIdx % uint(TILE_SIZE);
+
+        uint bx = blockIndex % tilesX;
+        uint by = blockIndex / tilesX;
+        uint px = bx * uint(TILE_SIZE) + col;
+        uint py = by * uint(TILE_SIZE) + row;
+
+        if (px < Width && py < Height)
+        {
+            int Y  = coeffs[0][pixelIdx];
+            int Co = coeffs[1][pixelIdx];
+            int Cg = coeffs[2][pixelIdx];
+
+            int t = Y - (Cg >> 1);
+            int G = Cg + t;
+            int B = t - (Co >> 1);
+            int R = Co + B;
+
+            R = clamp(R, 0, 255);
+            G = clamp(G, 0, 255);
+            B = clamp(B, 0, 255);
+
+            vec4 color = vec4(float(R), float(G), float(B), 255.0) / 255.0;
+            imageStore(outputImage, ivec2(int(px), int(py)), color);
+        }
+    }
+}

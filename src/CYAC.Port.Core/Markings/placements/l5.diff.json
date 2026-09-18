@@ -1,0 +1,15 @@
+{
+  "format": "cyac.markings-diff/1",
+  "class": "l5",
+  "base": { "generator": "MarkingBootstrap/1", "sha256": "c0f959a8c1391e9160db8361cdaf2b4f319f9f1e557122fd10eea3a0001d9579", "placements": 2 },
+  "remove": [],
+  "modify": {
+    "rule:wing upper": {
+      "bareMetal": "none"
+    },
+    "rule:wing lower": {
+      "bareMetal": "none"
+    }
+  },
+  "add": []
+}

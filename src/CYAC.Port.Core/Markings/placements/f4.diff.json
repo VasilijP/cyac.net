@@ -1,0 +1,20 @@
+{
+  "format": "cyac.markings-diff/1",
+  "class": "f4",
+  "base": { "generator": "MarkingBootstrap/1", "sha256": "79237fb4eea462b14997d1b8977a0b2cfe3918635762155686082d0a57c0729c", "placements": 3 },
+  "remove": [],
+  "modify": {
+    "rule:wing upper": {
+      "origin": [-50.4, -3, -58.229],
+      "size": 10
+    },
+    "rule:wing lower": {
+      "origin": [50.4, -3, -58.229],
+      "size": 10
+    },
+    "rule:fuselage side": {
+      "origin": [-13, 5.2432, 4.1599]
+    }
+  },
+  "add": []
+}

@@ -1,0 +1,29 @@
+{
+  "format": "cyac.marking/1",
+  "name": "checker-tail",
+  "about": "A black-and-white checkerboard for a fin (the 51st FIW Sabres): 8 × 4 squares over a 2.0 × 1.0 box, placed flat on the fin with sides: both; scale with the placement, rotate to follow the fin's sweep. '@' = the dark colour, black by default.",
+  "symmetric": true,
+  "bareMetal": "#A8ACB0",
+  "wear": { "chipping": { "amount": 0.08, "scale": 0.06, "seed": 47, "edgeBand": 0.04 } },
+  "layers": [
+    { "color": "#F2F2EE", "shape": { "type": "rect", "w": 2.0, "h": 1.0 } },
+    { "color": "@#141414", "shape": { "type": "union", "children": [
+      { "type": "transform", "x": -0.875, "y": 0.375, "child": { "type": "rect", "w": 0.25, "h": 0.25 } },
+      { "type": "transform", "x": -0.375, "y": 0.375, "child": { "type": "rect", "w": 0.25, "h": 0.25 } },
+      { "type": "transform", "x": 0.125, "y": 0.375, "child": { "type": "rect", "w": 0.25, "h": 0.25 } },
+      { "type": "transform", "x": 0.625, "y": 0.375, "child": { "type": "rect", "w": 0.25, "h": 0.25 } },
+      { "type": "transform", "x": -0.625, "y": 0.125, "child": { "type": "rect", "w": 0.25, "h": 0.25 } },
+      { "type": "transform", "x": -0.125, "y": 0.125, "child": { "type": "rect", "w": 0.25, "h": 0.25 } },
+      { "type": "transform", "x": 0.375, "y": 0.125, "child": { "type": "rect", "w": 0.25, "h": 0.25 } },
+      { "type": "transform", "x": 0.875, "y": 0.125, "child": { "type": "rect", "w": 0.25, "h": 0.25 } },
+      { "type": "transform", "x": -0.875, "y": -0.125, "child": { "type": "rect", "w": 0.25, "h": 0.25 } },
+      { "type": "transform", "x": -0.375, "y": -0.125, "child": { "type": "rect", "w": 0.25, "h": 0.25 } },
+      { "type": "transform", "x": 0.125, "y": -0.125, "child": { "type": "rect", "w": 0.25, "h": 0.25 } },
+      { "type": "transform", "x": 0.625, "y": -0.125, "child": { "type": "rect", "w": 0.25, "h": 0.25 } },
+      { "type": "transform", "x": -0.625, "y": -0.375, "child": { "type": "rect", "w": 0.25, "h": 0.25 } },
+      { "type": "transform", "x": -0.125, "y": -0.375, "child": { "type": "rect", "w": 0.25, "h": 0.25 } },
+      { "type": "transform", "x": 0.375, "y": -0.375, "child": { "type": "rect", "w": 0.25, "h": 0.25 } },
+      { "type": "transform", "x": 0.875, "y": -0.375, "child": { "type": "rect", "w": 0.25, "h": 0.25 } }
+    ] } }
+  ]
+}

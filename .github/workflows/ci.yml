@@ -1,0 +1,128 @@
+# Build and smoke-run the port on the three desktop systems it targets.
+#
+# Why this exists: the port is developed on a single machine, so nothing else proves it
+# still builds and starts elsewhere.  Every push has to prove that the solution still compiles — warnings are errors — and that
+# the two programs it produces still start, answer for themselves and refuse cleanly when
+# there is no game to fly.
+#
+# There are no test projects in this repository, so CI's signal is the compiler plus four
+# smoke runs, not a test report.  A fork is free to bring its own suites.  The runners have no original game files and never will — the repository
+# carries no game data — which is exactly what the preflight step checks: a clean, named
+# refusal rather than a crash.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  # So a run can be started by hand after a runner image changes.
+  workflow_dispatch:
+
+# One run per branch or pull request: a new push cancels the run still in flight.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Nothing here writes to the repository.
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  build-and-smoke:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      # Every system reports its own verdict: one red runner must not hide the other two.
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # The whole solution is net10.0.  There is no global.json, so the version is pinned
+      # here; add one if the repository ever needs to fix an exact SDK build.
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Report the toolchain
+        run: dotnet --info
+
+      - name: Restore
+        run: dotnet restore cyac.net.sln
+
+      # Warnings are errors.  Most port projects already say so in their own .csproj; the
+      # property on the command line extends that to the two that do not (CYAC.Formats and
+      # the vendored mode-13hx), so a new warning cannot slip in through them.
+      #
+      # Two deliberate details:
+      #
+      #   * It is -p:TreatWarningsAsErrors (the compiler's property), NOT the -warnaserror
+      #     switch (the MSBuild engine's).  The switch also promotes warnings raised by
+      #     BUILD TASKS, and mode-13hx raises one on macOS whenever no Vulkan loader is
+      #     installed (external/mode-13hx/src/mode13hx.csproj, the CopyVulkanLoader target).
+      #     A macOS runner has no loader, so -warnaserror would fail this job on macOS for a
+      #     message that is only advice to a developer.
+      #
+      #   * CS9113 ("parameter is unread") is the one known compiler warning in the vendored
+      #     copy, external/mode-13hx/src/BlankRasterizer.cs line 8.  mode-13hx is embedded
+      #     as-is (README Credits, external/mode-13hx/VENDOR.md), so the warning is exempted
+      #     here rather than patched into the vendored source.  Drop the second -p: flag
+      #     once it is fixed upstream and re-vendored.
+      - name: Build
+        run: >
+          dotnet build cyac.net.sln -c Release --no-restore
+          -p:TreatWarningsAsErrors=true -p:WarningsNotAsErrors=CS9113
+
+      # Four runs that need nothing but the build output.  Each asserts its own exit code,
+      # so a program that starts and then dies on a missing dependency is caught here and
+      # not by the first person to download a release.
+      #
+      # The last one is the interesting one.  `--preflight` on a home folder with no game in
+      # it must FAIL, cleanly and by name: exit non-zero, say that it found no game files and
+      # where to put them.  A runner can never have the originals, so this refusal is the only
+      # start-up path CI can exercise — and it is also the path every new player meets first.
+      # Asserting the exit code alone is not enough: a crash is also non-zero.  The message is
+      # grepped too, so the step fails if the program dies for some other reason.
+      - name: Smoke
+        shell: bash
+        run: |
+          set -u
+          failed=0
+          run_ok() {                      # name, then the command: must exit 0
+            local what="$1"; shift
+            echo "::group::$what"
+            if "$@"; then echo "OK   $what"; else echo "FAIL $what (exit $?)"; failed=1; fi
+            echo "::endgroup::"
+          }
+
+          run_ok "cyac-fly --help"      dotnet run --project src/CYAC.Port.Host      -c Release --no-build -- --help
+          run_ok "cyac-fly --version"   dotnet run --project src/CYAC.Port.Host      -c Release --no-build -- --version
+          run_ok "cyac-transform --help" dotnet run --project src/CYAC.Port.Transform -c Release --no-build -- --help
+
+          echo "::group::cyac-fly --preflight (no game files)"
+          rm -rf artifacts/smoke-home && mkdir -p artifacts/smoke-home
+          dotnet run --project src/CYAC.Port.Host -c Release --no-build -- \
+            --preflight --home artifacts/smoke-home > artifacts/preflight.txt 2>&1 && status=0 || status=$?
+          cat artifacts/preflight.txt
+          if [ "$status" -eq 0 ]; then
+            echo "FAIL preflight exited 0 with no game files; it must refuse"
+            failed=1
+          elif ! grep -q "no game files found" artifacts/preflight.txt; then
+            echo "FAIL preflight exited $status but never said it found no game files"
+            failed=1
+          else
+            echo "OK   preflight refused cleanly (exit $status, named the missing game)"
+          fi
+          echo "::endgroup::"
+
+          exit $failed

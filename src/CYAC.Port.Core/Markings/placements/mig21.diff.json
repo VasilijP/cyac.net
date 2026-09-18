@@ -1,0 +1,23 @@
+{
+  "format": "cyac.markings-diff/1",
+  "class": "mig21",
+  "base": { "generator": "MarkingBootstrap/1", "sha256": "e6f25a34938a22072abe6abb999068a2d3743241918ff2d70c4d657a9ea099d4", "placements": 2 },
+  "remove": [
+    "shipped:44,45"
+  ],
+  "modify": {
+    "shipped:57,58,59": {
+      "origin": [0, 20.833, -63.667],
+      "u": [0, -0.5379, 0.843],
+      "v": [0, -0.843, -0.5379],
+      "size": 11.333,
+      "mirror": "x"
+    }
+  },
+  "add": [
+    { "picture": "vpaf-insignia",
+      "origin": [-30.688, -0.621, -16.48], "u": [-0.008, 0.109, 0.994], "v": [0.9973, 0.074, -0.0001], "size": 10,
+      "sides": "both", "mirror": "x",
+      "note": "added on face 68" }
+  ]
+}

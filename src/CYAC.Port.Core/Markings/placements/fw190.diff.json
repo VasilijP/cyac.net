@@ -1,0 +1,26 @@
+{
+  "format": "cyac.markings-diff/1",
+  "class": "fw190",
+  "base": { "generator": "MarkingBootstrap/1", "sha256": "10f9403e6212bee379c4d64ce6057b35e997a47c86f2cdf795a9c48294157b2e", "placements": 4 },
+  "remove": [
+    "shipped:1",
+    "shipped:80,81,82,83",
+    "shipped:84,85,86,87"
+  ],
+  "modify": {
+    "shipped:73": {
+      "origin": [-1.392, 4.792, -35.582],
+      "u": [-0.042, 0, 0.9991],
+      "mirror": "x",
+      "bareMetal": "none",
+      "replaces": null,
+      "note": "bootstrap: shipped records 73; replaces DROPPED 2026-09-12 (P19): record 73 is fuselage skin (colour 22 on a colour-22 base, the dorsal fillet at the fin root, the paint tree's root split plane), a DecalConditioning false positive that hid a structural face and left a hole through the rear fuselage; the cross had also been moved 25 units forward of it"
+    }
+  },
+  "add": [
+    { "picture": "balkenkreuz",
+      "origin": [-45.304, 1.574, 1.085], "u": [-0.005, -0.03, 0.9995], "v": [-0.9885, 0.1509, -0.0004], "size": 12,
+      "sides": "top", "mirror": "x", "bareMetal": "none",
+      "note": "added on face 257" }
+  ]
+}

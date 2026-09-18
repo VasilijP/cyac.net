@@ -1,0 +1,12 @@
+{
+  "format": "cyac.marking/1",
+  "name": "usaaf-star-1943",
+  "about": "USAAF insignia May 1942 to June 1943: white star on a blue disc, no bars. Disc radius 0.5.",
+  "symmetric": true,
+  "bareMetal": "#A8ACB0",
+  "wear": { "chipping": { "amount": 0.10, "scale": 0.07, "seed": 7, "edgeBand": 0.06 }, "edgeWear": { "width": 0.012, "strength": 0.35 } },
+  "layers": [
+    { "color": "#1F2F5C", "shape": { "type": "circle", "r": 0.5 } },
+    { "color": "#F2F2EE", "shape": { "type": "star", "points": 5, "r": 0.47, "inner": 0.18, "rotation": 90 } }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "format": "cyac.markings-diff/1",
+  "class": "f86",
+  "base": { "generator": "MarkingBootstrap/1", "sha256": "d2bb33c23612e55b818efd796cb46d2dcafd8bc28f06df6e2e1486898ac56ba6", "placements": 1 },
+  "remove": [],
+  "modify": {
+    "band:60,61,62,63,64,65,66,67": {
+      "origin": [0, -1.026, -23.855],
+      "u": [0, -0.2439, 0.9698],
+      "v": [0, 0.9698, 0.2439],
+      "depth": 20
+    }
+  },
+  "add": [
+    { "picture": "checker-tail",
+      "origin": [0, 12.945, -75.406], "u": [0, -0.047, -0.9989], "v": [0, -0.9989, 0.047], "size": 18,
+      "sides": "both", "mirror": "none",
+      "note": "hand-placed 2026-09-11: the 51st FIW checkerboard on the fin (records 48/69), rotated to the fin\u0027s sweep; delete for a 4th FIW scheme and add sabre-fin-stripe instead" },
+    { "picture": "usaf-star-bar",
+      "origin": [-6.5798, -4.9977, -42.8136], "u": [-0.1102, 0.0631, 0.9919], "v": [0.0071, 0.998, -0.0627], "size": 6,
+      "sides": "top", "mirror": "x", "depth": 1,
+      "note": "added on face 42" },
+    { "picture": "sabre-band",
+      "origin": [-66.024, -6.226, -31.919], "u": [0.987, -0.05, 0.1528], "v": [0.1503, -0.0513, -0.9873], "size": 10,
+      "sides": "top", "mirror": "x",
+      "note": "added on face 91" },
+    { "picture": "usaf-star-bar",
+      "origin": [-51.0312, -6.6726, -22.326], "u": [0.9974, -0.0554, 0.0468], "v": [0.0443, -0.0458, -0.998], "size": 8,
+      "sides": "top", "mirror": "none",
+      "note": "added on face 91" },
+    { "picture": "usaf-star-bar",
+      "origin": [51.4102, -9.1801, -23.4907], "u": [0.9993, 0.0356, 0.0098], "v": [-0.0082, -0.0444, 0.999], "size": 8,
+      "sides": "top", "mirror": "none",
+      "note": "added on face 117" }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "format": "cyac.marking/1",
+  "name": "sabre-band",
+  "about": "The Korean War F-86 identification band: a yellow band bordered by a thin dark-blue line on each side (the 4th FIW style, with the port's blue lining). Made for sides: around — the band is 1.0 wide along the picture's X (size = the band's width along the fuselage) and 200 tall in Y so it wraps the whole body. '@' = the placement's colour, yellow by default.",
+  "symmetric": true,
+  "bareMetal": "#A8ACB0",
+  "wear": { "chipping": { "amount": 0.08, "scale": 0.05, "seed": 41, "edgeBand": 0.04 }, "edgeWear": { "width": 0.01, "strength": 0.3 } },
+  "layers": [
+    { "color": "#1F2F5C", "shape": { "type": "rect", "w": 1.0, "h": 200 } },
+    { "color": "@#E8C227", "shape": { "type": "rect", "w": 0.8, "h": 200 } }
+  ]
+}

@@ -1,0 +1,115 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>disable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>14</LangVersion>
+    </PropertyGroup>
+
+    <!-- macOS: copy Vulkan loader next to GLFW so both GLFW and Silk.NET resolve the same loader.
+         Resolution order: $VULKAN_SDK/lib (LunarG SDK, sourced via setup-env.sh) → /usr/local/lib (Homebrew) → /opt/homebrew/lib (Apple Silicon Homebrew) -->
+    <Target Name="CopyVulkanLoader" AfterTargets="Build" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+        <PropertyGroup>
+            <VulkanLoaderPath Condition="Exists('$(VULKAN_SDK)/lib/libvulkan.1.dylib')">$(VULKAN_SDK)/lib/libvulkan.1.dylib</VulkanLoaderPath>
+            <VulkanLoaderPath Condition="'$(VulkanLoaderPath)' == '' and Exists('/usr/local/lib/libvulkan.1.dylib')">/usr/local/lib/libvulkan.1.dylib</VulkanLoaderPath>
+            <VulkanLoaderPath Condition="'$(VulkanLoaderPath)' == '' and Exists('/opt/homebrew/lib/libvulkan.1.dylib')">/opt/homebrew/lib/libvulkan.1.dylib</VulkanLoaderPath>
+        </PropertyGroup>
+        <Warning Text="No Vulkan loader found. Install the LunarG Vulkan SDK and source setup-env.sh, or 'brew install vulkan-loader'."
+                 Condition="'$(VulkanLoaderPath)' == ''" />
+        <Copy SourceFiles="$(VulkanLoaderPath)"
+              DestinationFolder="$(OutputPath)/runtimes/osx-arm64/native/"
+              SkipUnchangedFiles="true"
+              Condition="'$(VulkanLoaderPath)' != ''" />
+    </Target>
+
+    <ItemGroup>
+      <PackageReference Include="CommandLineParser" Version="2.9.1" />
+      <PackageReference Include="Silk.NET.Vulkan" Version="2.22.0" />
+      <PackageReference Include="Silk.NET.Vulkan.Extensions.KHR" Version="2.22.0" />
+      <PackageReference Include="Silk.NET.Windowing" Version="2.22.0" />
+      <PackageReference Include="Silk.NET.Input" Version="2.22.0" />
+      <PackageReference Include="tgalib-core" Version="0.3.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="resources\texture\oldschool_9x16.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\texture\oldschool_16x16.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\shader.vert">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\shader.frag">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\shader_ssbo.frag">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\shader.vert.spv">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\shader.frag.spv">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\shader_ssbo.frag.spv">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\decomp_rle.comp">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\decomp_rle.comp.spv">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\decomp_rle2.comp">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\decomp_rle2.comp.spv">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\decomp_b16.comp">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\decomp_b16.comp.spv">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\decomp_l26.comp">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\decomp_l26.comp.spv">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\decomp_s64.comp">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\decomp_s64.comp.spv">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\decomp_sl64.comp">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\decomp_sl64.comp.spv">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\texture\box_128.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\texture\box_128.tga">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\texture\oldschool_9x16.tga">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\texture\oldschool_16x16.tga">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\texture\test_8bitRLE.tga">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+</Project>

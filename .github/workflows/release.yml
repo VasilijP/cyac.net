@@ -1,0 +1,182 @@
+# Build the downloadable binaries for a tag and attach them to a DRAFT GitHub Release.
+#
+# Why this exists: a player has no .NET SDK and will not install one.
+# A self-contained publish carries the runtime with it, so a zip is all they need — plus
+# their own copy of the original game, which this repository never ships.
+#
+# The release is left as a DRAFT on purpose.  A tag only produces the files; a human reads
+# the notes, checks the zips and presses Publish.
+#
+# Each runtime is published ON ITS OWN OPERATING SYSTEM — never cross-built.  Publishing
+# the Host with a runtime identifier copies the referenced cyac-transform apphost twice and
+# the SDK refuses the duplicate (NETSDK1152); the project allows that duplicate exactly
+# because the two copies are the same program for the same platform, which only holds when
+# the build runs on that platform (src/CYAC.Port.Host/CYAC.Port.Host.csproj).
+#
+# osx-x64 is deliberately absent: the macOS runner is Apple Silicon, so an Intel build would
+# be a cross-build.  Add a second matrix entry on the `macos-13` image (Intel) if Intel Macs
+# are ever wanted.
+
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  # So the zips can be rebuilt for an existing tag without re-tagging.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to build (e.g. v0.1.0)'
+        required: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: ${{ matrix.rid }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    # The tag being built, whether it arrived as a push or was typed into the manual run.
+    # Both shells read it from the environment, so neither has to repeat the expression.
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: windows-latest, rid: win-x64,   sdl: SDL2.dll,          exe: cyac-fly.exe, xform: cyac-transform.exe }
+          - { os: ubuntu-latest,  rid: linux-x64, sdl: libSDL2-2.0.so,    exe: cyac-fly,     xform: cyac-transform }
+          - { os: macos-latest,   rid: osx-arm64, sdl: libSDL2-2.0.dylib, exe: cyac-fly,     xform: cyac-transform }
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # Self-contained: the .NET runtime travels with the game, so the user installs nothing.
+      # The natives (SDL2 for sound, GLFW for the window) flatten into the folder next to the
+      # executable; the shaders and fonts come along through the mode-13hx project reference.
+      - name: Publish
+        run: >
+          dotnet publish src/CYAC.Port.Host -c Release
+          -r ${{ matrix.rid }} --self-contained true
+          -o artifacts/publish/${{ matrix.rid }}
+
+      # A build that quietly lost its sound library or its executable still zips and still
+      # uploads, and the player is the one who finds out.  Check here instead.
+      - name: Check the payload
+        shell: bash
+        run: |
+          out="artifacts/publish/${{ matrix.rid }}"
+          missing=0
+          for file in "${{ matrix.exe }}" "${{ matrix.xform }}" "${{ matrix.sdl }}" \
+                      resources/shader.frag.spv resources/texture/oldschool_9x16.png; do
+            if [ ! -f "$out/$file" ]; then
+              echo "MISSING from the published output: $file"
+              missing=1
+            fi
+          done
+          echo "$(find "$out" -type f | wc -l) file(s) published for ${{ matrix.rid }}"
+          exit $missing
+
+      # zip on Linux and macOS keeps the executable bit, which the user needs to start the
+      # game at all; Windows has no such bit and no zip, so PowerShell does it there.
+      - name: Zip (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path artifacts/zip | Out-Null
+          # ${env:TAG} is braced on purpose: $env:TAG- would read the hyphen as part of the name.
+          Compress-Archive -Path artifacts/publish/${{ matrix.rid }}/* -DestinationPath "artifacts/zip/cyac.net-${env:TAG}-${{ matrix.rid }}.zip"
+
+      - name: Zip (Linux, macOS)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          mkdir -p artifacts/zip
+          cd "artifacts/publish/${{ matrix.rid }}"
+          zip -r -q -y "../../zip/cyac.net-$TAG-${{ matrix.rid }}.zip" .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zip-${{ matrix.rid }}
+          path: artifacts/zip/*.zip
+          if-no-files-found: error
+          retention-days: 7
+
+  draft-release:
+    name: Draft release
+    needs: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # The only step in either workflow that writes to the repository.
+    permissions:
+      contents: write
+
+    steps:
+      # download-artifact is the sibling of the upload used above; both are GitHub's own.
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: zip-*
+          path: artifacts
+          merge-multiple: true
+
+      - name: Checksums
+        shell: bash
+        run: |
+          cd artifacts
+          sha256sum *.zip | tee SHA256SUMS
+          ls -l
+
+      # gh is pre-installed on the runners, so no third-party release action is needed.
+      # Creating the release is separate from uploading, so a re-run of the workflow tops up
+      # an existing draft instead of failing on "release already exists".
+      - name: Draft the release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          if ! gh release view "$TAG" > /dev/null 2>&1; then
+            gh release create "$TAG" --draft --title "cyac.net $TAG" --notes "$(cat <<'NOTES'
+          A .NET port of *Chuck Yeager's Air Combat* (1991).
+
+          **You need your own copy of the original game** — this download contains no game data.
+          Put the original files, or the zip holding them, into a `game/` folder next to the
+          executable and start the port; it converts them on the first run. The files it accepts are
+          listed in the README.
+
+          | Download | For |
+          |:--|:--|
+          | `…-win-x64.zip` | Windows, 64-bit |
+          | `…-linux-x64.zip` | Linux, 64-bit |
+          | `…-osx-arm64.zip` | macOS, Apple Silicon |
+
+          Nothing needs to be installed: the .NET runtime is inside the zip.
+
+          * **Vulkan** is required for the picture. Windows: it ships with the GPU driver. Linux:
+            `sudo apt install libvulkan1`, or your distribution's equivalent. **macOS: the build
+            carries no Vulkan loader yet** — install the LunarG Vulkan SDK and source its
+            `setup-env.sh` before starting. Bundling MoltenVK is planned.
+          * The binaries are **not signed**. Windows SmartScreen: *More info → Run anyway*. macOS
+            Gatekeeper: right-click → *Open*, or `xattr -dr com.apple.quarantine <folder>`.
+          * On Linux and macOS, make it executable if the unzip tool dropped the bit:
+            `chmod +x cyac-fly`.
+
+          `SHA256SUMS` lists the checksum of every zip.
+          NOTES
+          )"
+          fi
+          gh release upload "$TAG" artifacts/*.zip artifacts/SHA256SUMS --clobber
+          echo "Draft release $TAG is ready for a human to review and publish."

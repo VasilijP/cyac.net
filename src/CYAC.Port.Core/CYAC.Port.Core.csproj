@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    CYAC.Port.Core — the native C# port's engine core (doc/native-port-plan.md, BUILDING since
+    2026-08-24).  Clean, idiomatic C#: NOT a citizen of the instruction-counting emulator.
+
+    DEPENDENCY RULE (plan §9b + transform-plan L2): this project references NO other project at
+    all.  It must NEVER reference CYAC.Emulator / CYAC.Emulator.*, and as of port batch 2 T7 it no
+    longer references CYAC.Formats either: the runtime reads the transformed open-format data tree,
+    not the original assets.  The emulator is a dev-side reference instrument that may reference
+    THIS assembly to certify it — never the other way around.
+
+    Schema/state_schema.json = the exported scanner.py state schema (E2), the data-model ground
+    truth.  Regenerate with `python3 doc/port_schema_export.py`; never hand-edit.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RootNamespace>CYAC.Port.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Schema\state_schema.json" LogicalName="CYAC.Port.Core.Schema.state_schema.json" />
+    <!-- ★ VECTOR MARKINGS (2026-09-11, doc/port-vector-markings-spec.md): the port's OWN pictures,
+         font and per-class placements — knowledge, not shipped data — embedded so a runtime needs
+         no directory to draw them.  An override directory (fly - -markings-dir) overlays them.
+         Placements ship as DIFFS over the base MarkingBootstrap generates from the data tree
+         (placements/<class>.diff.json → resource "…placements.<class>.diff.json"); the base's
+         numbers come from the original meshes and are never embedded. -->
+    <EmbeddedResource Include="Markings\font.json" LogicalName="CYAC.Port.Core.Markings.font.json" />
+    <EmbeddedResource Include="Markings\pictures\*.json" LogicalName="CYAC.Port.Core.Markings.pictures.%(Filename).json" />
+    <EmbeddedResource Include="Markings\placements\*.diff.json" LogicalName="CYAC.Port.Core.Markings.placements.%(Filename).json" />
+  </ItemGroup>
+
+  <!--
+    NO ProjectReference. ~~The on-disk format codecs (CYAC.Formats)~~ *(retired 2026-08-25, port
+    batch 2 T7 — transform-plan law L2: "the runtime reads the data tree only". This assembly loads
+    JSON/PNG/WAV documents that `cyac-transform` produced and never opens a `.lib` or the
+    executable, so CYAC.Formats is now a TRANSFORM-TIME dependency only. The test project still
+    references it (its fixtures compare the tree against the shipping assets) and so does
+    CYAC.Port.Transform.)*
+
+    The dependency rule (native-port-plan §9b) still stands and is now stricter than it was: this
+    project references NOTHING but the BCL, and never CYAC.Emulator*.
+    `PortDataLoaderTests.PortCoreReferencesNeitherFormatsNorTheEmulator` asserts it by reflection.
+  -->
+
+</Project>

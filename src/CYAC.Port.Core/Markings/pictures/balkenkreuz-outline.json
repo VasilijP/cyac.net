@@ -1,0 +1,14 @@
+{
+  "format": "cyac.marking/1",
+  "name": "balkenkreuz-outline",
+  "about": "The simplified late-war Balkenkreuz: the four white (or black, on light undersides) flank angles only, the cross itself left in the camouflage colour. Colour '@' takes the placement's colour (default white). Width 1.0.",
+  "symmetric": true,
+  "bareMetal": "#A8ACB0",
+  "wear": { "chipping": { "amount": 0.10, "scale": 0.06, "seed": 13, "edgeBand": 0.05 } },
+  "layers": [
+    { "color": "@", "shape": { "type": "subtract", "children": [
+        { "type": "union", "children": [ { "type": "rect", "w": 1.0, "h": 0.42 }, { "type": "rect", "w": 0.42, "h": 1.0 } ] },
+        { "type": "union", "children": [ { "type": "rect", "w": 1.0, "h": 0.26 }, { "type": "rect", "w": 0.26, "h": 1.0 } ] }
+    ] } }
+  ]
+}

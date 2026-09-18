@@ -1,0 +1,19 @@
+{
+  "format": "cyac.marking/1",
+  "name": "debug-checker",
+  "about": "A 4x4 checkerboard over the unit box, for the browser's preview and for aiming a placement; no wear.",
+  "symmetric": true,
+  "layers": [
+    { "color": "#F0F0E8", "shape": { "type": "rect", "w": 1.0, "h": 1.0 } },
+    { "color": "#202028", "shape": { "type": "union", "children": [
+      { "type": "transform", "x": -0.375, "y": 0.375, "child": { "type": "rect", "w": 0.25, "h": 0.25 } },
+      { "type": "transform", "x": 0.125, "y": 0.375, "child": { "type": "rect", "w": 0.25, "h": 0.25 } },
+      { "type": "transform", "x": -0.125, "y": 0.125, "child": { "type": "rect", "w": 0.25, "h": 0.25 } },
+      { "type": "transform", "x": 0.375, "y": 0.125, "child": { "type": "rect", "w": 0.25, "h": 0.25 } },
+      { "type": "transform", "x": -0.375, "y": -0.125, "child": { "type": "rect", "w": 0.25, "h": 0.25 } },
+      { "type": "transform", "x": 0.125, "y": -0.125, "child": { "type": "rect", "w": 0.25, "h": 0.25 } },
+      { "type": "transform", "x": -0.125, "y": -0.375, "child": { "type": "rect", "w": 0.25, "h": 0.25 } },
+      { "type": "transform", "x": 0.375, "y": -0.375, "child": { "type": "rect", "w": 0.25, "h": 0.25 } }
+    ] } }
+  ]
+}

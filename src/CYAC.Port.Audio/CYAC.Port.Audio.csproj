@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    CYAC.Port.Audio — the native port's SOUND path (port batch 7 H11; plan of record
+    doc/port-batch7-poc-plan.md §0 D1: "mode-13hx has no sound facility; audio is ours, on the
+    emulator's mixer model").
+
+    PURE, in the same sense CYAC.Port.Render is pure: this assembly takes driver bytes and a stream
+    of driver calls and produces FLOAT SAMPLES into a Span<float>.  It never opens an audio device,
+    never sees a window, never touches simulation state, and holds no clock of its own — the host
+    tells it how many samples to render and when.
+
+    DEPENDENCY RULE (doc/native-port-plan.md §9b + batch-7 protocol rule 4): CYAC.Port.Core ONLY.
+    Never CYAC.Emulator* — the r100c generator model in src/CYAC.Emulator/Machine/RefinedSfx.cs is
+    this project's REFERENCE IMPLEMENTATION and is re-implemented here with attribution
+    (AdlToneEngine's banner), not referenced.  AudioPurityTests asserts it by reflection.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RootNamespace>CYAC.Port.Audio</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CYAC.Port.Core\CYAC.Port.Core.csproj" />
+  </ItemGroup>
+
+</Project>

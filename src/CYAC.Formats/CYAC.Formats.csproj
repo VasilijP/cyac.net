@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    CYAC.Formats — shared, UI-free library of CYAC on-disk format codecs.
+
+    Extracted from CYAC.Tools.ResourceBrowser/EaLib in the r102 mission-system
+    campaign (pilot 9, stage 2) so that BOTH the read-only resource browser and
+    the (write-capable) mission editor sit on one implementation.  The browser
+    remains read-only; every WRITE path (EaLibWriter, LzssCompressor) lives
+    here and is exercised by the editor.
+
+    No Avalonia / no UI dependencies — this must stay usable from plain CLI
+    tools and test harnesses.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The Exe/ decoders keep their working state (StubMemory, the per-layer machines) internal:
+         they are the packer formats' innards, not API.  The transform tool's test project drives
+         them directly with SYNTHETIC packed streams it authors itself, which is the only coverage
+         of the two expanders that survives in a checkout without sources/ (transform-plan L7). -->
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>CYAC.Port.Transform.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <!-- Nothing about the win rules is embedded.  The transform reads each mission's rule model out of
+       its module with EaLib/WinRuleExtractor.cs (a model is returned only when WinRuleSynthesizer gives
+       the module bytes back), and its parameter catalog with EaLib/WinRuleParamCollector.cs (every
+       parameter is proven by patching a copy of the module and reading the rules back). -->
+
+</Project>

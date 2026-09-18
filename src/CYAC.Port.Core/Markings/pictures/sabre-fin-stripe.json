@@ -1,0 +1,12 @@
+{
+  "format": "cyac.marking/1",
+  "name": "sabre-fin-stripe",
+  "about": "A bordered stripe for a FIN (the 4th FIW Sabres' second band, parallel to the rudder line): 1.0 wide along X, 4.5 tall along Y — finite, so a flat placement (sides: both) stays on the fin; rotate the frame to follow the sweep. '@' = the stripe colour, yellow by default; dark-blue borders.",
+  "symmetric": true,
+  "bareMetal": "#A8ACB0",
+  "wear": { "chipping": { "amount": 0.08, "scale": 0.05, "seed": 53, "edgeBand": 0.04 }, "edgeWear": { "width": 0.01, "strength": 0.3 } },
+  "layers": [
+    { "color": "#1F2F5C", "shape": { "type": "rect", "w": 1.0, "h": 4.5 } },
+    { "color": "@#E8C227", "shape": { "type": "rect", "w": 0.8, "h": 4.5 } }
+  ]
+}

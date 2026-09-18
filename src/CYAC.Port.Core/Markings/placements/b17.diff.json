@@ -1,0 +1,26 @@
+{
+  "format": "cyac.markings-diff/1",
+  "class": "b17",
+  "base": { "generator": "MarkingBootstrap/1", "sha256": "7a8fda7ab31b48390af00fd89bdb8cea66f2dd26cd9e548a81345bfafaa4eaf4", "placements": 4 },
+  "remove": [
+    "shipped:48",
+    "shipped:53",
+    "shipped:58",
+    "shipped:63"
+  ],
+  "modify": {},
+  "add": [
+    { "picture": "usaaf-star-bar",
+      "origin": [-72.2724, 3.0474, 19.155], "u": [0.9969, -0.0792, -0.0007], "v": [-0.0062, -0.069, -0.9976], "size": 10,
+      "sides": "top", "mirror": "none", "bareMetal": "none",
+      "note": "added on face 229" },
+    { "picture": "usaaf-star-bar",
+      "origin": [72.0742, 1.0755, 17.7157], "u": [-0.9942, -0.1066, -0.0161], "v": [0.0139, 0.0207, -0.9997], "size": 10,
+      "sides": "top", "mirror": "none", "bareMetal": "none",
+      "note": "added on face 165" },
+    { "picture": "usaaf-star-bar",
+      "origin": [-5.685, 0.836, -31.023], "u": [-0.057, -0.008, 0.9983], "v": [0.4842, 0.8743, 0.0347], "size": 6,
+      "sides": "top", "mirror": "x", "bareMetal": "none",
+      "note": "added on face 7" }
+  ]
+}

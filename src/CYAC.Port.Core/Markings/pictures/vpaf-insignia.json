@@ -1,0 +1,13 @@
+{
+  "format": "cyac.marking/1",
+  "name": "vpaf-insignia",
+  "about": "Vietnam People's Air Force insignia: a yellow star on a red disc inside a yellow ring. Outer radius 0.5.",
+  "symmetric": true,
+  "bareMetal": "#A8ACB0",
+  "wear": { "chipping": { "amount": 0.10, "scale": 0.06, "seed": 23, "edgeBand": 0.05 } },
+  "layers": [
+    { "color": "#B3202B", "shape": { "type": "circle", "r": 0.5 } },
+    { "color": "#E1B830", "shape": { "type": "ring", "r": 0.43, "width": 0.06 } },
+    { "color": "#E1B830", "shape": { "type": "star", "points": 5, "r": 0.3, "inner": 0.12, "rotation": 90 } }
+  ]
+}

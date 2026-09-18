@@ -1,0 +1,11 @@
+{
+  "format": "cyac.marking/1",
+  "name": "band",
+  "about": "A plain painted band or stripe (a fuselage band, a tail stripe) in the placement's colour ('@'); 1.0 wide along the picture's X, 0.3 high — scale with the placement.",
+  "symmetric": true,
+  "bareMetal": "#A8ACB0",
+  "wear": { "chipping": { "amount": 0.10, "scale": 0.08, "seed": 31, "edgeBand": 0.05 } },
+  "layers": [
+    { "color": "@", "shape": { "type": "rect", "w": 1.0, "h": 0.3 } }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "format": "cyac.marking/1",
+  "name": "text",
+  "about": "A code, a serial, a buzz number: the placement supplies the text (and the colour through '@'). Cap height 1.0, centred on the origin (size = the cap height); codes are NEVER mirrored on the far side.",
+  "noMirror": true,
+  "bareMetal": "#A8ACB0",
+  "wear": { "chipping": { "amount": 0.08, "scale": 0.12, "seed": 29, "edgeBand": 0.1 } },
+  "layers": [
+    { "color": "@", "shape": { "type": "glyphs", "text": "CYAC", "height": 1.0, "spacing": 0.0, "centre": true } }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "format": "cyac.markings-diff/1",
+  "class": "me262",
+  "base": { "generator": "MarkingBootstrap/1", "sha256": "c934cbeceb2d78c3c351e169085b574133b464854d976c0c34ed5427a16ea96e", "placements": 2 },
+  "remove": [],
+  "modify": {
+    "shipped:78,79,80,81": {
+      "bareMetal": "none"
+    },
+    "shipped:82,83,84,85": {
+      "bareMetal": "none"
+    }
+  },
+  "add": []
+}

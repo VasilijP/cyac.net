@@ -1,0 +1,22 @@
+{
+  "format": "cyac.markings-diff/1",
+  "class": "yak9",
+  "base": { "generator": "MarkingBootstrap/1", "sha256": "be90903a11dd439d8edd8b1b67f3f6ad800ff90de13fe3e3f338def5d62b0f5d", "placements": 2 },
+  "remove": [
+    "shipped:19"
+  ],
+  "modify": {
+    "shipped:38,39,40": {
+      "origin": [0, 14.667, -46],
+      "size": 6.309,
+      "mirror": "x",
+      "bareMetal": "none"
+    }
+  },
+  "add": [
+    { "picture": "soviet-star",
+      "origin": [-43.456, 1.023, 12.539], "u": [-0.3179, 0.067, 0.9457], "v": [0.9463, -0.039, 0.3209], "size": 10,
+      "sides": "both", "mirror": "x", "bareMetal": "none",
+      "note": "added on face 134" }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "format": "cyac.marking/1",
+  "name": "sabre-band-black",
+  "about": "The F-86 identification band with black borders (the 51st FIW style). sides: around; width 1.0 along X, tall in Y. '@' = the band colour, yellow by default.",
+  "symmetric": true,
+  "bareMetal": "#A8ACB0",
+  "wear": { "chipping": { "amount": 0.08, "scale": 0.05, "seed": 43, "edgeBand": 0.04 }, "edgeWear": { "width": 0.01, "strength": 0.3 } },
+  "layers": [
+    { "color": "#141414", "shape": { "type": "rect", "w": 1.0, "h": 200 } },
+    { "color": "@#E8C227", "shape": { "type": "rect", "w": 0.8, "h": 200 } }
+  ]
+}
