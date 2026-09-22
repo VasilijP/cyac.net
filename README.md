@@ -16,7 +16,10 @@ Electronic Arts or the estate of Chuck Yeager. All trademarks belong to their ow
 to name the game this port works with. **The repository contains no game data.** To play, you need
 your own copy of the original game.
 
-**TLDR**: `dotnet run --project src/CYAC.Port.Host -c Release -- fly -w 1920 -h 1080 -v --no-readout --fast --ai-sleep-cap 0 -f --mission 25` is how I run it to launch a mission directly, full screen, 1080p. It is a mission 25 in this case, remove the `--mission 25` and you get a menu.
+**TLDR**: `dotnet run --project src/CYAC.Port.Host -c Release -- --mission 25` is how I run it to launch a
+mission directly. The defaults are the ones to play with: full screen at 1920x1080, vsync, mode-13hx's
+fast mode, no text readout. Remove the `--mission 25` and you get a menu; add `--windowed` to run in a
+window, `--width`/`--height` to change the size.
 
 ## What you need
 

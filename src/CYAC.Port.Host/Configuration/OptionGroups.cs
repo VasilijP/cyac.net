@@ -74,7 +74,7 @@ public static class OptionGroups
     /// <summary>The <see cref="OptionGroup.Display"/> options, in the order <c>--help</c> prints them.</summary>
     private static readonly string[] DisplayNames =
     [
-        "width", "height", "fullscreen", "vsync", "view", "fov", "cockpit", "cockpit-fit",
+        "width", "height", "windowed", "no-vsync", "view", "fov", "cockpit", "cockpit-fit",
         "flight-info", "windows", "hud-style", "map", "clouds", "markings",
     ];
 
@@ -92,7 +92,7 @@ public static class OptionGroups
         "effect-probe-range", "effect-probe-count", "mission-kills", "debrief-at", "mask-view",
         "shot-dir", "render-scene", "foe-hp", "kill-burst", "target-cycle", "projection-census",
         "projection-from", "instrument-census", "pose-census", "ai-census", "kill-census",
-        "effect-age", "effect-fork", "eject-at", "player-death-at", "no-readout", "gear-angle",
+        "effect-age", "effect-fork", "eject-at", "player-death-at", "readout", "no-readout", "gear-angle",
         "camera", "camera-step", "near-census", "ground-census", "line-census", "pixel-census",
         "census-rect", "crop", "crop-scale", "hud-demo", "frontend", "settings-census",
         "stats-census", "menu-wiring", "wav", "wav-seconds", "tone-log",
@@ -101,7 +101,7 @@ public static class OptionGroups
     /// <summary>The <see cref="OptionGroup.Developer"/> options, in the order <c>--help</c> prints them.</summary>
     private static readonly string[] DeveloperNames =
     [
-        "dofps", "frames", "drop-frames", "fast", "frame-compression", "compressor",
+        "fullscreen", "vsync", "dofps", "frames", "drop-frames", "fast", "no-fast", "frame-compression", "compressor",
         "compression-threads", "no-scenery", "chase-distance", "chase-elevation", "draw-distance",
         "classic-cull", "alpha", "edges", "lod", "cloud-tiles", "ground-balls",
         "ground-ball-tiles", "hard-effects", "smoke-growth", "smoke-size", "smoke-trail",

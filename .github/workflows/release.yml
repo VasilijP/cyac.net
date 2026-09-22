@@ -181,6 +181,9 @@ jobs:
 
           Nothing needs to be installed: the .NET runtime is inside the zip.
 
+          * It starts **full screen at 1920x1080** with vsync. Esc opens the game's own menu, which has
+            Exit; `cyac-fly.exe --windowed` runs it in a window, `--width`/`--height` change the size,
+            and `--help` lists the rest.
           * **Vulkan** is required for the picture; it ships with the GPU driver.
           * The binaries are **not signed**. Windows SmartScreen will warn on the first start:
             *More info → Run anyway*.

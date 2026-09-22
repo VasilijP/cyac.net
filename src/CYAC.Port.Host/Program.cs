@@ -74,6 +74,9 @@ public static class Program
 
     private static int Run(FlyOptions options, IReadOnlyList<string> args)
     {
+        // Full screen, vsync and fast mode on unless the command line opts out (FlyOptions.ApplyPlayerDefaults).
+        options.ApplyPlayerDefaults();
+
         // Every user-supplied path becomes absolute BEFORE the working directory can move.
         options.DataPath = Absolute(options.DataPath);
         options.SeedTrace = Absolute(options.SeedTrace);
@@ -168,7 +171,7 @@ public static class Program
             return 1;
         }
 
-        readout &= !options.NoReadout;
+        readout &= options.DrawReadout;
         return options.Headless
             ? RunHeadless(options, tree, readout, settings, stats)
             : RunWindow(options, tree, readout, settings, stats);
@@ -446,7 +449,7 @@ public static class Program
                 game = Startup.GameSession.TryOpen(
                     options,
                     loaded,
-                    readout && !options.NoReadout,
+                    readout && options.DrawReadout,
                     settings,
                     stats,
                     Startup.PreloadedAssets.From(result, pipelineOptions.MarkingsDirectory),
@@ -485,7 +488,7 @@ public static class Program
     private static WindowOptions WindowOptionsFor(FlyOptions options)
     {
         WindowOptions windowOptions = WindowOptions.DefaultVulkan;
-        windowOptions.Title = "CYAC — port PoC";
+        windowOptions.Title = "cyac.net — Chuck Yeager's Air Combat";
         windowOptions.Size = new Vector2D<int>(options.Width, options.Height);
         windowOptions.WindowState = options.Fullscreen ? WindowState.Fullscreen : WindowState.Normal;
         windowOptions.VSync = options.VSync;

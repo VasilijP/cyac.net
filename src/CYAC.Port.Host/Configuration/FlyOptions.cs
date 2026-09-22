@@ -686,6 +686,14 @@ public sealed class FlyOptions : CommonOptions
     [Option("fov", Default = CameraLens.DefaultHorizontalFovDegrees, HelpText = "Horizontal field of view in degrees (default = the original's own 102.68°, derived from its projector's 2^7-pixel focal length).")]
     public double Fov { get; set; }
 
+    /// <summary>Run in a window; full screen is the player's default (see <see cref="ApplyPlayerDefaults"/>).</summary>
+    [Option("windowed", Default = false, HelpText = "Run in a window of --width x --height instead of full screen. Full screen is the default; -f/--fullscreen is accepted and names that default.")]
+    public bool Windowed { get; set; }
+
+    /// <summary>Present without vertical sync; vsync is the player's default (see <see cref="ApplyPlayerDefaults"/>).</summary>
+    [Option("no-vsync", Default = false, HelpText = "Present frames as fast as the GPU allows, tearing included. VSync is the default; -v/--vsync is accepted and names that default.")]
+    public bool NoVSync { get; set; }
+
     /// <summary>Which view the frame is drawn from.</summary>
     [Option("view", Default = "cockpit", HelpText = "Which of the original's eighteen view keys to start in: cockpit|back|left|right|up|down (F1..F6), chase|extback|extright|extleft|below|above (Shift-F1..F6), planetotarget (F7), targettoplane (F8), flyby (F10), targetcockpit (Shift-F7), exttarget (Shift-F8), circling (Shift-F9), missile (Shift-F10). F9 (map) is out of scope.")]
     public string? View { get; set; }
@@ -1037,9 +1045,17 @@ public sealed class FlyOptions : CommonOptions
     [Option("player-death-at", Default = -1.0, HelpText = "CHEAT (labelled): arm the player's own DEATH DEADLINE ([0xBD06]) at this simulated second, so a headless sortie can actually be shot down — the ported sustain tick then runs the whole real death path (image@0x0FE3C). An initial-state edit and nothing else; negative (the default) is off.")]
     public double PlayerDeathAt { get; set; }
 
+    /// <summary>Draw the text readout over the frame in the window; see <see cref="DrawReadout"/>.</summary>
+    [Option("readout", Default = false, HelpText = "Draw the text readout over the frame in the WINDOW. The window never draws it unless asked - it is an instrument, and a player would see a wall of text over the game. A headless run draws it into every saved frame unless --no-readout says otherwise.")]
+    public bool Readout { get; set; }
+
     /// <summary>Do not draw the text readout over the frame.</summary>
     [Option("no-readout", Default = false, HelpText = "Do not draw the text readout over the frame — for photographing the scene itself. The headless summary still prints every line.")]
     public bool NoReadout { get; set; }
+
+    /// <summary>Let the rasterizer wait for a free frame slot; fast mode is the player's default (see <see cref="ApplyPlayerDefaults"/>).</summary>
+    [Option("no-fast", Default = false, HelpText = "Switch mode-13hx's fast mode OFF: the rasterizer waits for a free frame slot instead of dropping its oldest unread frame. Fast mode is the default; --fast is accepted and names that default.")]
+    public bool NoFast { get; set; }
 
     /// <summary>Do not draw the <c>sun</c> object.</summary>
     [Option("no-sun", Default = false, HelpText = "Do not draw the `sun` object — the single white disc the engine keeps 100 world units above the camera (scene_or_mission_state_reset @image@0x0C461 + alloc_slot_a_camera_pos_update @image@0x2DC9D).")]
@@ -1583,4 +1599,30 @@ public sealed class FlyOptions : CommonOptions
     public string? AudioReset { get; set; }
 
     private void Bind(Key key, ControlEnum control) => KbControls[key] = Control.Create(control);
+
+    /// <summary>
+    /// Whether the text readout is drawn into the frame: in the window only on <c>--readout</c>, in a
+    /// headless run unless <c>--no-readout</c>.  The caller still ANDs in whether the font is reachable.
+    /// </summary>
+    public bool DrawReadout => Headless ? !NoReadout : Readout && !NoReadout;
+
+    /// <summary>
+    /// Turns the parsed command line into the player's defaults: full screen, vsync and fast mode
+    /// on unless <c>--windowed</c>, <c>--no-vsync</c> or <c>--no-fast</c> says otherwise.
+    /// </summary>
+    /// <remarks>
+    /// <c>-f</c>, <c>-v</c> and <c>--fast</c> are mode-13hx's own switches
+    /// (<c>external/mode-13hx/src/Configuration/CommonOptions.cs</c>) and default to OFF there, which
+    /// is right for a presentation-layer demo and wrong for a game a player starts by double-clicking
+    /// it: a 1080p window over the desktop, tearing, and a rasterizer that stalls on vsync.  A
+    /// CommandLineParser switch cannot be negated on the command line, so the defaults are inverted
+    /// HERE, after the parse, through three opt-out switches the host owns rather than by editing the
+    /// vendored defaults.  The three original switches stay accepted and name the default.
+    /// </remarks>
+    public void ApplyPlayerDefaults()
+    {
+        Fullscreen = !Windowed;
+        VSync = !NoVSync;
+        Fast = !NoFast;
+    }
 }
