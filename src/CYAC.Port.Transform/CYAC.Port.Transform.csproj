@@ -24,7 +24,6 @@
     <AssemblyName>cyac-transform</AssemblyName>
     <RootNamespace>CYAC.Port.Transform</RootNamespace>
     <InvariantGlobalization>true</InvariantGlobalization>
-    <Version>0.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

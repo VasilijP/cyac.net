@@ -2,7 +2,14 @@
 
 .NET 10 / C# port of a legendary CYAC from 1991: *Chuck Yeager's Air Combat* for DOS.
 
-> **Status: work in progress, not released.** There are no downloads yet; build from source (below).
+[![CI](https://github.com/VasilijP/cyac.net/actions/workflows/ci.yml/badge.svg)](https://github.com/VasilijP/cyac.net/actions/workflows/ci.yml)
+
+> **Status: early release (0.1.0).** A Windows (64-bit) download is on the
+> [Releases](https://github.com/VasilijP/cyac.net/releases) page. **It contains no game data: you must
+> supply your own copy of the original game** (the files, or the zip holding them; see below). Unzip the
+> download, put the originals into its `game/` folder and start `cyac-fly.exe`. Nothing has to be
+> installed — the .NET runtime is inside the zip. Linux and macOS have no download yet; build from
+> source (below).
 
 This is an unofficial, fan-made project. It is not affiliated with, endorsed by or connected to
 Electronic Arts or the estate of Chuck Yeager. All trademarks belong to their owners and are used only
@@ -136,13 +143,10 @@ Linux and macOS ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)): both p
 `--help`, `cyac-fly` must answer `--version`, and `cyac-fly --preflight` on an empty home folder must
 refuse by name rather than crash. The runners have no original game files, so that refusal is the one
 start-up path CI can check — and it is the one a new player meets first. A `v*` tag builds the
-self-contained downloads for `win-x64`, `linux-x64` and `osx-arm64`, each on its own operating system,
-and attaches them to a **draft** release for a human to check and publish
-([`.github/workflows/release.yml`](.github/workflows/release.yml)).
-
-<!-- Add the build badge once the repository is public, correcting the owner/name if needed:
-[![CI](https://github.com/VasilijP/cyac.net/actions/workflows/ci.yml/badge.svg)](https://github.com/VasilijP/cyac.net/actions/workflows/ci.yml)
--->
+self-contained download — `win-x64` for now; `linux-x64` and `osx-arm64` are prepared in the matrix and
+switched on once each has been played from a published zip — and attaches it to a **draft** release for
+a human to check and publish ([`.github/workflows/release.yml`](.github/workflows/release.yml)). The tag
+must match the `<Version>` in `src/Directory.Build.props`, which is the number both programs report.
 
 ## Credits
 

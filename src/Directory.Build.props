@@ -1,0 +1,18 @@
+<Project>
+
+  <!--
+    One version for every project under src/.  This is the number that cyac-fly reports
+    (its version option and the preflight screen's corner) and that cyac-transform reports, and the
+    release workflow refuses to build a tag whose name is not v<this> (.github/workflows/release.yml).
+    To release: bump it here, commit, tag v<Version>, push the tag.
+
+    external/mode-13hx sits outside src/ and is not touched: it is vendored as-is.
+  -->
+  <PropertyGroup>
+    <Version>0.1.0</Version>
+    <Authors>Peter Truchly</Authors>
+    <Product>cyac.net</Product>
+    <Copyright>Copyright (c) 2026 Peter Truchly. MIT License.</Copyright>
+  </PropertyGroup>
+
+</Project>

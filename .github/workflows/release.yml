@@ -51,8 +51,12 @@ jobs:
       matrix:
         include:
           - { os: windows-latest, rid: win-x64,   sdl: SDL2.dll,          exe: cyac-fly.exe, xform: cyac-transform.exe }
-          - { os: ubuntu-latest,  rid: linux-x64, sdl: libSDL2-2.0.so,    exe: cyac-fly,     xform: cyac-transform }
-          - { os: macos-latest,   rid: osx-arm64, sdl: libSDL2-2.0.dylib, exe: cyac-fly,     xform: cyac-transform }
+          # Windows is the only download for now: it is the one platform the port has been
+          # played on end to end from a published zip.  Uncomment a line below once that
+          # platform has been tested the same way, and add its row to the notes further down.
+          # The macOS build also still lacks a Vulkan loader (MoltenVK), see the README.
+          # - { os: ubuntu-latest,  rid: linux-x64, sdl: libSDL2-2.0.so,    exe: cyac-fly,     xform: cyac-transform }
+          # - { os: macos-latest,   rid: osx-arm64, sdl: libSDL2-2.0.dylib, exe: cyac-fly,     xform: cyac-transform }
 
     steps:
       - uses: actions/checkout@v4
@@ -62,6 +66,19 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+
+      # The binaries report the <Version> in src/Directory.Build.props; a tag that names a
+      # different number would publish a game that contradicts its own release page.
+      # Stop here rather than on the release page.
+      - name: Check the tag against the version
+        shell: bash
+        run: |
+          version=$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' src/Directory.Build.props)
+          echo "src/Directory.Build.props says $version, the tag is $TAG"
+          if [ "v$version" != "$TAG" ]; then
+            echo "The tag must be v$version (or bump <Version> first)."
+            exit 1
+          fi
 
       # Self-contained: the .NET runtime travels with the game, so the user installs nothing.
       # The natives (SDL2 for sound, GLFW for the window) flatten into the folder next to the
@@ -150,29 +167,26 @@ jobs:
         run: |
           if ! gh release view "$TAG" > /dev/null 2>&1; then
             gh release create "$TAG" --draft --title "cyac.net $TAG" --notes "$(cat <<'NOTES'
-          A .NET port of *Chuck Yeager's Air Combat* (1991).
+          A .NET port of *Chuck Yeager's Air Combat* (1991), for Windows (64-bit).
 
-          **You need your own copy of the original game** — this download contains no game data.
-          Put the original files, or the zip holding them, into a `game/` folder next to the
-          executable and start the port; it converts them on the first run. The files it accepts are
+          **This download contains no game data. You must supply your own copy of the original
+          game** — the port cannot ship it. Unzip, put the original files (or the zip holding them)
+          into a `game/` folder next to `cyac-fly.exe`, and start `cyac-fly.exe`: the port finds them
+          by content, converts them on the first run and opens the main menu. The files it accepts are
           listed in the README.
 
           | Download | For |
           |:--|:--|
           | `…-win-x64.zip` | Windows, 64-bit |
-          | `…-linux-x64.zip` | Linux, 64-bit |
-          | `…-osx-arm64.zip` | macOS, Apple Silicon |
 
           Nothing needs to be installed: the .NET runtime is inside the zip.
 
-          * **Vulkan** is required for the picture. Windows: it ships with the GPU driver. Linux:
-            `sudo apt install libvulkan1`, or your distribution's equivalent. **macOS: the build
-            carries no Vulkan loader yet** — install the LunarG Vulkan SDK and source its
-            `setup-env.sh` before starting. Bundling MoltenVK is planned.
-          * The binaries are **not signed**. Windows SmartScreen: *More info → Run anyway*. macOS
-            Gatekeeper: right-click → *Open*, or `xattr -dr com.apple.quarantine <folder>`.
-          * On Linux and macOS, make it executable if the unzip tool dropped the bit:
-            `chmod +x cyac-fly`.
+          * **Vulkan** is required for the picture; it ships with the GPU driver.
+          * The binaries are **not signed**. Windows SmartScreen will warn on the first start:
+            *More info → Run anyway*.
+          * Keyboard and mouse only — no joystick support yet. The other known limitations are
+            listed in the README.
+          * Linux and macOS: no download yet, build from source (see the README).
 
           `SHA256SUMS` lists the checksum of every zip.
           NOTES
