@@ -157,7 +157,9 @@ jobs:
 
       # gh is pre-installed on the runners, so no third-party release action is needed.
       # Creating the release is separate from uploading, so a re-run of the workflow tops up
-      # an existing draft instead of failing on "release already exists".
+      # an existing draft instead of failing on "release already exists".  A DRAFT's notes are
+      # rewritten on every run so they follow this file; a PUBLISHED release's notes are the
+      # human's and are left alone.
       - name: Draft the release
         shell: bash
         env:
@@ -165,8 +167,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
           TAG: ${{ inputs.tag || github.ref_name }}
         run: |
-          if ! gh release view "$TAG" > /dev/null 2>&1; then
-            gh release create "$TAG" --draft --title "cyac.net $TAG" --notes "$(cat <<'NOTES'
+          cat > notes.md <<'NOTES'
           A .NET port of *Chuck Yeager's Air Combat* (1991), for Windows (64-bit).
 
           **This download contains no game data. You must supply your own copy of the original
@@ -193,7 +194,10 @@ jobs:
 
           `SHA256SUMS` lists the checksum of every zip.
           NOTES
-          )"
+          if ! gh release view "$TAG" > /dev/null 2>&1; then
+            gh release create "$TAG" --draft --title "cyac.net $TAG" --notes-file notes.md
+          elif [ "$(gh release view "$TAG" --json isDraft --jq .isDraft)" = "true" ]; then
+            gh release edit "$TAG" --notes-file notes.md
           fi
           gh release upload "$TAG" artifacts/*.zip artifacts/SHA256SUMS --clobber
           echo "Draft release $TAG is ready for a human to review and publish."
