@@ -654,7 +654,7 @@ public static class PortSettings
                     : HudStyle.Refined,
             }),
         Number(
-            "hud-stroke", "Cockpit & HUD", "HUD stroke", 0.64, 0.1, 3.0, 0.02, 2, "px",
+            "hud-stroke", "Cockpit & HUD", "HUD stroke", 0.15, 0.1, 3.0, 0.02, 2, "px",
             "The refined HUD marks' stroke width, in 320x200 design pixels (the 1991 runs are "
                 + "1.0 wide).",
             o => o.HudStroke, (o, v) => o.HudStroke = v,

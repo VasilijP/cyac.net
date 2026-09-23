@@ -54,7 +54,6 @@ jobs:
           # Windows is the only download for now: it is the one platform the port has been
           # played on end to end from a published zip.  Uncomment a line below once that
           # platform has been tested the same way, and add its row to the notes further down.
-          # The macOS build also still lacks a Vulkan loader (MoltenVK), see the README.
           # - { os: ubuntu-latest,  rid: linux-x64, sdl: libSDL2-2.0.so,    exe: cyac-fly,     xform: cyac-transform }
           # - { os: macos-latest,   rid: osx-arm64, sdl: libSDL2-2.0.dylib, exe: cyac-fly,     xform: cyac-transform }
 
@@ -97,7 +96,7 @@ jobs:
           out="artifacts/publish/${{ matrix.rid }}"
           missing=0
           for file in "${{ matrix.exe }}" "${{ matrix.xform }}" "${{ matrix.sdl }}" \
-                      resources/shader.frag.spv resources/texture/oldschool_9x16.png; do
+                      resources/gl.frag resources/gl.vert resources/shader.frag.spv resources/texture/oldschool_9x16.png; do
             if [ ! -f "$out/$file" ]; then
               echo "MISSING from the published output: $file"
               missing=1
@@ -185,7 +184,9 @@ jobs:
           * It starts **full screen at 1920x1080** with vsync. Esc opens the game's own menu, which has
             Exit; `cyac-fly.exe --windowed` runs it in a window, `--width`/`--height` change the size,
             and `--help` lists the rest.
-          * **Vulkan** is required for the picture; it ships with the GPU driver.
+          * The picture is drawn with **OpenGL 3.3**, which every GPU driver of the last decade has.
+            `--gfx vulkan` selects the Vulkan presenter instead; it needs the Vulkan loader from the
+            GPU driver, and on a laptop with two GPUs both drivers current.
           * The binaries are **not signed**. Windows SmartScreen will warn on the first start:
             *More info → Run anyway*.
           * Keyboard and mouse only — no joystick support yet. The other known limitations are

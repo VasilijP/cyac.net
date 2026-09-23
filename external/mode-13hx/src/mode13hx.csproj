@@ -27,6 +27,7 @@
 
     <ItemGroup>
       <PackageReference Include="CommandLineParser" Version="2.9.1" />
+      <PackageReference Include="Silk.NET.OpenGL" Version="2.22.0" />
       <PackageReference Include="Silk.NET.Vulkan" Version="2.22.0" />
       <PackageReference Include="Silk.NET.Vulkan.Extensions.KHR" Version="2.22.0" />
       <PackageReference Include="Silk.NET.Windowing" Version="2.22.0" />
@@ -45,6 +46,12 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="resources\shader.frag">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\gl.vert">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="resources\gl.frag">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="resources\shader_ssbo.frag">

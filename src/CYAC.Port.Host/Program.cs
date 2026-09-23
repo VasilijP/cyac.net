@@ -43,7 +43,7 @@ namespace CYAC.Port.Host;
 /// <remarks>
 /// <see cref="RunWindow"/> mirrors <c>mode13hx.Program.RunWithOptions</c>
 /// (<c>external/mode-13hx/src/Program.cs</c>) rather than calling it, because the verb table and the
-/// rasterizer are ours; everything else about the window — Vulkan surface, frame pacing, keyboard —
+/// rasterizer are ours; everything else about the window — the OpenGL or Vulkan presenter, frame pacing, keyboard —
 /// is the vendored library's, unchanged.
 /// </remarks>
 public static class Program
@@ -76,6 +76,11 @@ public static class Program
     {
         // Full screen, vsync and fast mode on unless the command line opts out (FlyOptions.ApplyPlayerDefaults).
         options.ApplyPlayerDefaults();
+        if (!string.Equals(options.Gfx, "opengl", StringComparison.OrdinalIgnoreCase) && !options.UseVulkan)
+        {
+            Console.Error.WriteLine($"--gfx must be opengl or vulkan, not '{options.Gfx}'.");
+            return 1;
+        }
 
         // Every user-supplied path becomes absolute BEFORE the working directory can move.
         options.DataPath = Absolute(options.DataPath);
@@ -487,7 +492,8 @@ public static class Program
     /// <param name="options">The command line.</param>
     private static WindowOptions WindowOptionsFor(FlyOptions options)
     {
-        WindowOptions windowOptions = WindowOptions.DefaultVulkan;
+        // --gfx: OpenGL 3.3 core (the default) or Vulkan; mode-13hx's EngineWindow creates the matching presenter.
+        WindowOptions windowOptions = options.UseVulkan ? WindowOptions.DefaultVulkan : WindowOptions.Default;
         windowOptions.Title = "cyac.net — Chuck Yeager's Air Combat";
         windowOptions.Size = new Vector2D<int>(options.Width, options.Height);
         windowOptions.WindowState = options.Fullscreen ? WindowState.Fullscreen : WindowState.Normal;

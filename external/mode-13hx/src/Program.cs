@@ -19,7 +19,7 @@ public static class Program
 
     private static int RunWithOptions<T>(T config, IRasterizer ras) where T : CommonOptions
     {
-        WindowOptions options = WindowOptions.DefaultVulkan;
+        WindowOptions options = config.UseVulkan ? WindowOptions.DefaultVulkan : WindowOptions.Default;
         options.Title = "mode13hx";
         options.Size = new Vector2D<int>(config.Width, config.Height);
         options.WindowState = config.Fullscreen ? WindowState.Fullscreen : WindowState.Normal;

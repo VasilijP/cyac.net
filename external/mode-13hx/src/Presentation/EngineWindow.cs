@@ -11,7 +11,10 @@ namespace mode13hx.Presentation;
 public class EngineWindow : IDisposable
 {
     private readonly IWindow window;
+    // Exactly one of the two presenters is created in OnLoad (CommonOptions.Gfx, see VENDOR.md).
     private VulkanRenderer renderer;
+    private GlRenderer glRenderer;
+    private readonly bool useVulkan;
     private readonly Thread renderThread;
     private readonly IRasterizer rasterizer;
     private FrameBuffer frameBuffer;
@@ -35,7 +38,11 @@ public class EngineWindow : IDisposable
         renderThread = new Thread(RenderThreadMain) { IsBackground = true };
         elapsedTime = Stopwatch.StartNew();
 
-        if (config.FrameCompression)
+        useVulkan = config.UseVulkan;
+        if (config.FrameCompression && !useVulkan)
+            Console.WriteLine("--frame-compression decompresses on a compute shader and needs --gfx vulkan; presenting uncompressed.");
+
+        if (config.FrameCompression && useVulkan)
         {
             compressor = config.Compressor.ToLowerInvariant() switch
             {
@@ -62,10 +69,17 @@ public class EngineWindow : IDisposable
 
     private void OnLoad()
     {
-        renderer = new VulkanRenderer(window, config.Width, config.Height, config.VSync);
+        if (useVulkan)
+        {
+            renderer = new VulkanRenderer(window, config.Width, config.Height, config.VSync);
 
-        if (config.FrameCompression && compressor != null)
-            renderer.InitComputePipeline(compressor.DecompressShaderName);
+            if (config.FrameCompression && compressor != null)
+                renderer.InitComputePipeline(compressor.DecompressShaderName);
+        }
+        else
+        {
+            glRenderer = new GlRenderer(window, config.Width, config.Height);
+        }
 
         inputContext = window.CreateInput();
 
@@ -91,6 +105,18 @@ public class EngineWindow : IDisposable
     private unsafe void OnRenderFrame(double deltaTime)
     {
         frameCount++;
+
+        if (!useVulkan)
+        {
+            // The latest CPU-rasterized frame, uploaded into the GL texture and drawn; the window swaps
+            // after this returns.  glTexSubImage2D copies the pixels before it returns, so the slot is
+            // free again immediately.
+            FrameDescriptor glFrame = frameBuffer.Use();
+            bytesTransmitted += glFrame.Transferred;
+            glRenderer.Present(glFrame.Buffer.Data.AsPointer() + glFrame.Offset);
+            frameBuffer.ReleaseFrame();
+            return;
+        }
 
         // Wait for GPU to finish with this frame slot before writing to shared buffers
         renderer.BeginFrame();
@@ -151,6 +177,8 @@ public class EngineWindow : IDisposable
         timer.Stop();
         renderer?.Dispose();
         renderer = null;
+        glRenderer?.Dispose();
+        glRenderer = null;
     }
 
     public void Run() => window.Run();
@@ -158,6 +186,7 @@ public class EngineWindow : IDisposable
     public void Dispose()
     {
         renderer?.Dispose();
+        glRenderer?.Dispose();
         inputContext?.Dispose();
         timer.Dispose();
         window.Dispose();

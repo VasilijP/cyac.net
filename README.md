@@ -77,11 +77,14 @@ the game and the tests read it.
 Prerequisites:
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- Vulkan:
-  - **Windows**: the loader ships with your GPU driver.
+- OpenGL 3.3, the default presenter: on Windows and Linux it comes with the GPU driver; on macOS it is
+  built in (Apple's OpenGL 4.1 is enough, the presenter asks for a 3.3 core profile).
+- Vulkan, optional (`--gfx vulkan`):
+  - **Windows**: the loader ships with your GPU driver. On a laptop with two GPUs, keep the
+    integrated one's driver current too.
   - **Linux**: `sudo apt install libvulkan1` (or your distribution's equivalent).
-  - **macOS**: for now, the [LunarG Vulkan SDK](https://vulkan.lunarg.com/sdk/home#mac) with its
-    `setup-env.sh` sourced in the shell you run from. Bundling MoltenVK is planned.
+  - **macOS**: the [LunarG Vulkan SDK](https://vulkan.lunarg.com/sdk/home#mac) with its
+    `setup-env.sh` sourced in the shell you run from.
 
 Steps, from the repository root:
 
@@ -137,7 +140,7 @@ hard rule about original game data.
 | `src/CYAC.Port.Transform` | `cyac-transform`: original files → open data tree, and back. |
 | `src/CYAC.Formats` | Codecs for the original file formats, used by the transform. |
 | `src/CYAC.Port.Preflight` | The start-up check: find the originals, build the data tree, verify it. |
-| `external/mode-13hx` | The window / Vulkan presentation layer, embedded (see Credits). |
+| `external/mode-13hx` | The window / presentation layer (OpenGL or Vulkan), embedded (see Credits). |
 
 ### Continuous integration
 

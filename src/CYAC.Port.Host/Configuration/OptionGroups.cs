@@ -74,7 +74,7 @@ public static class OptionGroups
     /// <summary>The <see cref="OptionGroup.Display"/> options, in the order <c>--help</c> prints them.</summary>
     private static readonly string[] DisplayNames =
     [
-        "width", "height", "windowed", "no-vsync", "view", "fov", "cockpit", "cockpit-fit",
+        "width", "height", "windowed", "no-vsync", "gfx", "view", "fov", "cockpit", "cockpit-fit",
         "flight-info", "windows", "hud-style", "map", "clouds", "markings",
     ];
 

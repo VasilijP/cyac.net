@@ -20,6 +20,12 @@ public class CommonOptions
     // false and closes the window through its own action instead.
     public bool CloseOnEscape { get; set; } = true;
 
+    // CYAC local extension (see VENDOR.md): which presenter draws the frame.
+    [Option("gfx", Default = "opengl", HelpText = "opengl|vulkan — the presenter. OpenGL 3.3 core is the default and runs on every desktop driver, macOS included; Vulkan needs a loader (the GPU driver on Windows and Linux, MoltenVK on macOS) and is the one with --frame-compression.")]
+    public string Gfx { get; set; }
+
+    public bool UseVulkan => string.Equals(Gfx, "vulkan", StringComparison.OrdinalIgnoreCase);
+
     [Option('v', "vsync", Default = false, HelpText = "Enable or disable VSync.")]
     public bool VSync { get; set; }
 

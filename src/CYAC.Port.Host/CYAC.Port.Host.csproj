@@ -7,7 +7,7 @@
     external/mode-13hx/src/Program.cs RunWithOptions does, and supplies the IRasterizer.
 
     Dependencies (batch-7 protocol rule 4 + plan §2 step 1):
-      mode13hx        the window, Vulkan presentation, keyboard/mouse, Canvas/font
+      mode13hx        the window, OpenGL or Vulkan presentation, keyboard/mouse, Canvas/font
       CYAC.Port.Core  the certified integer flight kernel and the data tree
       CYAC.Port.Render the pure renderer
       CYAC.Port.Audio  the pure sound path (H11)
@@ -15,7 +15,7 @@
                       the game itself never reads an original asset — transform-plan law L2)
     NEVER CYAC.Emulator*.
 
-    Referencing mode13hx (an Exe) is legal in the .NET SDK; its resources/*.spv shaders and
+    Referencing mode13hx (an Exe) is legal in the .NET SDK; its resources/ shaders (GLSL and SPIR-V) and
     resources/texture/*.tga fonts are CopyToOutputDirectory items and flow into this project's
     output through the ProjectReference (verified: see temp/port_b7/H1_report.md §3).
   -->
@@ -44,7 +44,7 @@
        depends on, Ultz.Native.SDL 2.30.8, is SDL2 under the zlib licence and carries
        linux-arm/arm64/x64, osx (universal x86_64 + arm64), win-arm64/x64/x86 through the standard
        runtimes/<rid>/native mechanism.  ONLY the audio subsystem is initialised: the window,
-       the input and the presentation stay mode-13hx's GLFW + Vulkan. -->
+       the input and the presentation stay mode-13hx's GLFW + OpenGL/Vulkan. -->
   <ItemGroup>
     <PackageReference Include="Silk.NET.SDL" Version="2.22.0" />
   </ItemGroup>

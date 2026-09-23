@@ -1,16 +1,38 @@
-# Vendored dependency — mode-13hx (feature/vulkan)
+# Vendored dependency — mode-13hx (feature/vulkan, plus an OpenGL presenter)
 
 Upstream: https://github.com/VasilijP/mode-13hx/tree/feature/vulkan
 Vendored at commit `84d209f6e8fb94f381cabc669c934f882640e9ec`, excluding `.git`, `bin`, `obj`.
 
-Role in CYAC: the port's **executable host** — window, Vulkan presentation, keyboard + mouse. It is
-an Exe project used as a subproject of `cyac.net.sln`; `CYAC.Port.Host` references
-`external/mode-13hx/src/mode13hx.csproj` and supplies its own `Main`.
+Role in CYAC: the port's **executable host** — window, presentation (OpenGL by default, Vulkan on
+request), keyboard + mouse. It is an Exe project used as a subproject of `cyac.net.sln`;
+`CYAC.Port.Host` references `external/mode-13hx/src/mode13hx.csproj` and supplies its own `Main`.
 
 Rules: treat it as a dependency. No large-scale refactoring. Extensions this port needs (more
 key/input mapping, small adjustments) are allowed here and are candidates to **backport upstream**;
 keep every local change listed below so the diff against upstream stays reviewable (`diff -r`
 against a fresh checkout of the commit above).
+
+## The OpenGL presenter (local addition, `--gfx`)
+
+Upstream's presenter is Vulkan, chosen for its compute shaders (the frame-compression path). A game
+only needs a presenter, and Vulkan asks things of a player's machine that OpenGL does not: a loader
+(MoltenVK on macOS, loaded by hand), and drivers in order — a laptop GTX 1070 died silently until its
+Intel iGPU driver was updated too. So this copy carries a second presenter and selects one with
+`--gfx`: `opengl` (the default) is a 3.3 core, forward-compatible context, which every desktop driver
+of the last decade provides, Apple's frozen 4.1 included; `vulkan` is upstream's presenter, untouched,
+and the only one `--frame-compression` works with. Upstream `main` is OpenGL too but on OpenTK, with
+a frame buffer that needs a live GL context in its constructor; CYAC builds frame buffers with no
+window (`--headless`, `--preflight --shot`, `--render-scene`), so it was not taken; its quad, its
+GLSL 330 shaders and its texture set-up were.
+
+| File | Change | Why |
+|:--|:--|:--|
+| `src/Presentation/GlRenderer.cs` | **Added.** One RGBA8 texture (frame-height wide, frame-width tall: the frame is column-major), one full-screen quad with upstream `main`'s vertices, `glTexSubImage2D` per frame, GLSL 330 shaders read from `resources/gl.vert` and `gl.frag`. Logs the renderer and version on start. | The default presenter. Backportable as a second presenter. |
+| `src/resources/gl.vert`, `src/resources/gl.frag` | **Added**, upstream `main`'s GLSL 330 shaders under their own names (`shader.vert`/`.frag` stay the Vulkan GLSL 450 sources of the `.spv` files). | |
+| `src/Configuration/CommonOptions.cs` | Added `--gfx opengl\|vulkan` (default `opengl`) and `UseVulkan`. | The switch. |
+| `src/Presentation/EngineWindow.cs` | Creates one presenter or the other in `OnLoad`; `OnRenderFrame` has a short OpenGL branch (`Use()` → `Present(pixels)` → `ReleaseFrame()`) ahead of the unchanged Vulkan path; both are disposed. `--frame-compression` without `--gfx vulkan` prints a note and presents uncompressed. | |
+| `src/Program.cs` | `WindowOptions.Default` or `DefaultVulkan` by `--gfx`. | |
+| `src/mode13hx.csproj` | `Silk.NET.OpenGL` 2.22.0 added beside the Vulkan packages; `gl.vert`/`gl.frag` copied to the output. | |
 
 ## Local changes vs upstream 84d209f
 

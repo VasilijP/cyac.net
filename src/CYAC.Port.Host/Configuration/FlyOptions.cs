@@ -1103,7 +1103,7 @@ public sealed class FlyOptions : CommonOptions
     public string? HudStyle { get; set; }
 
     /// <summary>The refined HUD marks' stroke width, in 320×200 design pixels.</summary>
-    [Option("hud-stroke", Default = 0.64, HelpText = "Refined HUD style: the stroke width of the pipper ring, lead dots' scale, waterline, target box and lock diamond, in 320x200 design pixels (the 1991 runs are 1.0 wide). 0 = the built-in default.")]
+    [Option("hud-stroke", Default = 0.15, HelpText = "Refined HUD style: the stroke width of the pipper ring, lead dots' scale, waterline, target box and lock diamond, in 320x200 design pixels (the 1991 runs are 1.0 wide). 0.15 (the default) is a thin, precise sight a play-test preferred for aiming; 0 = 0.64, the earlier period-looking stroke.")]
     public double HudStroke { get; set; }
 
     /// <summary>The decal lift, in model units.</summary>
